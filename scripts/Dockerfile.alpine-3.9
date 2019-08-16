@@ -1,0 +1,47 @@
+FROM alpine:3.9 as builder
+MAINTAINER IOTech <support@iotechsys.com>
+
+RUN apk add --update --no-cache \
+    dbus \
+    dbus-dev \
+    dbus-libs \
+    build-base \
+    gcc \
+    cmake \
+    make \
+    linux-headers \
+    yaml-dev \
+    libmicrohttpd-dev \
+    curl-dev \
+    git
+
+COPY scripts /device-bluetooth-c/scripts
+COPY cmake /device-bluetooth-c/cmake
+COPY src /device-bluetooth-c/src/
+COPY VERSION /device-bluetooth-c/
+
+COPY CMakeLists.txt /device-bluetooth-c/CMakeLists.txt
+
+RUN /device-bluetooth-c/scripts/build_deps.sh
+RUN /device-bluetooth-c/scripts/build.sh
+
+FROM alpine:3.9
+
+RUN apk add --update --no-cache \
+    dbus \
+    yaml \
+    libmicrohttpd \
+    curl \
+    libuuid
+
+COPY --from=builder /usr/lib/libcsdk.so /usr/lib
+COPY --from=builder /usr/include/edgex /usr/include/edgex
+COPY --from=builder /usr/include/iot /usr/include/iot
+COPY --from=builder /usr/local/lib/libcbor* /usr/local/lib/
+
+COPY --from=builder /device-bluetooth-c/build/release/device-bluetooth-c/device-bluetooth-c device-bluetooth-c
+
+COPY res res/
+COPY profiles profiles/
+
+ENTRYPOINT ["./device-bluetooth-c"]

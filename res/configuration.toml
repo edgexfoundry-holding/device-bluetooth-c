@@ -1,0 +1,37 @@
+[Service]
+  Host = "edgex-device-bluetooth"
+  Port = 49971
+  Timeout = 5000
+  ConnectRetries = 3
+  Labels = [ "Bluetooth" ]
+  StartupMsg = "The Bluetooth device service has started"
+  ReadMaxLimit = 256
+  CheckInterval = "10s"
+
+[Clients]
+  [Clients.Data]
+    Host = "edgex-core-data"
+    Port = 48080
+
+  [Clients.Metadata]
+    Host = "edgex-core-metadata"
+    Port = 48081
+
+[Device]
+  DataTransform = true
+  Discovery = true
+  InitCmd = ""
+  InitCmdArgs = ""
+  MaxCmdOps = 128
+  MaxCmdValueLen = 256
+  RemoveCmd = ""
+  RemoveCmdArgs = ""
+  ProfilesDir = "./profiles"
+
+[Driver]
+  BluetoothInterface = "hci0"
+  BluetoothDiscoveryDuration = "20"
+
+[Logging]
+  RemoteURL = ""
+  File = "-"

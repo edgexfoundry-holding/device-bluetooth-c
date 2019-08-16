@@ -1,0 +1,696 @@
+name: "CC2650 SensorTag"
+manufacturer: "Texas Instruments"
+model: "2650 STK"
+labels:
+  - "Bluetooth"
+description: "TI SensorTag 2650 STK"
+deviceResources:
+  -
+    name: "CC2650TemperatureConfiguration"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa22-0451-4000-b000-000000000000" }
+    properties:
+      value:
+        { type: "Bool", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+  -
+    name: "CC2650TemperatureData"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa21-0451-4000-b000-000000000000", startByte: "1", rawType: "Uint16" }
+    properties:
+      value:
+        { type: "Float32",  floatEncoding: "eNotation", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+  -
+    name: "CC2650HumidityConfiguration"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa22-0451-4000-b000-000000000000" }
+    properties:
+      value:
+        { type: "Bool", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+  -
+    name: "CC2650HumidityData"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa21-0451-4000-b000-000000000000", startByte: "3", rawType: "Uint16" }
+    properties:
+      value:
+        { type: "Float32",  floatEncoding: "eNotation", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+
+  -
+    name: "CC2650BarometricTemperatureConfiguration"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa42-0451-4000-b000-000000000000" }
+    properties:
+      value:
+        { type: "Bool", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+  -
+    name: "CC2650BarometricTemperatureData"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa41-0451-4000-b000-000000000000", startByte: "1", rawType: "Uint32" }
+    properties:
+      value:
+        { type: "Float32", floatEncoding: "eNotation", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Degrees Celsius" }
+  -
+    name: "CC2650BarometricConfiguration"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa42-0451-4000-b000-000000000000" }
+    properties:
+      value:
+        { type: "Bool", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+  -
+    name: "CC2650BarometricData"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa41-0451-4000-b000-000000000000", startByte: "3", rawType: "Uint32" }
+    properties:
+      value:
+        { type: "Float32", floatEncoding: "eNotation", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+  -
+    name: "CC2650OpticalSensorConfiguration"
+    description: "Optical Sensor Configuration"
+    attributes:
+      { characteristicUuid: "f000aa72-0451-4000-b000-000000000000" }
+    properties:
+      value:
+        { type: "Bool", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "On/Off" }
+  -
+    name: "CC2650OpticalSensorData"
+    description: "Optical Sensor Data"
+    attributes:
+      { characteristicUuid: "f000aa71-0451-4000-b000-000000000000", startByte: "1", rawType: "Uint16" }
+    properties:
+      value:
+        { type: "Float32", floatEncoding: "eNotation", readWrite: "R" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Level" }
+  -
+    name: "CC2650GyroscopeXConfiguration"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa82-0451-4000-b000-000000000000", bitShift: "2", rawType: "Uint16" }
+    properties:
+      value:
+        { type: "Bool", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+  -
+    name: "CC2650GyroscopeYConfiguration"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa82-0451-4000-b000-000000000000", bitShift: "1", rawType: "Uint16" }
+    properties:
+      value:
+        { type: "Bool", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+  -
+    name: "CC2650GyroscopeZConfiguration"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa82-0451-4000-b000-000000000000", bitShift: "0", rawType: "Uint16" }
+    properties:
+      value:
+        { type: "Bool", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+  -
+    name: "CC2650GyroscopeXData"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa81-0451-4000-b000-000000000000", startByte: "1", rawType: "Int16" }
+    properties:
+      value:
+        { type: "Float32", floatEncoding: "eNotation", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+
+  -
+    name: "CC2650GyroscopeYData"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa81-0451-4000-b000-000000000000", startByte: "3", rawType: "Int16" }
+    properties:
+      value:
+        { type: "Float32", floatEncoding: "eNotation", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+
+  -
+    name: "CC2650GyroscopeZData"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa81-0451-4000-b000-000000000000", startByte: "5", rawType: "Int16" }
+    properties:
+      value:
+        { type: "Float32", floatEncoding: "eNotation", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+  -
+    name: "CC2650AccelerometerXConfiguration"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa82-0451-4000-b000-000000000000", bitShift: "5", rawType: "Uint16" }
+    properties:
+      value:
+        { type: "Bool", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+
+  -
+    name: "CC2650AccelerometerYConfiguration"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa82-0451-4000-b000-000000000000", bitShift: "4", rawType: "Uint16" }
+    properties:
+      value:
+        { type: "Bool", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+
+  -
+    name: "CC2650AccelerometerZConfiguration"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa82-0451-4000-b000-000000000000", bitShift: "3", rawType: "Uint16" }
+    properties:
+      value:
+        { type: "Bool", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+  -
+    name: "CC2650AccelerometerXData"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa81-0451-4000-b000-000000000000", startByte: "7", rawType: "Int16" }
+    properties:
+      value:
+        { type: "Float32", floatEncoding: "eNotation", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+
+  -
+    name: "CC2650AccelerometerYData"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa81-0451-4000-b000-000000000000", startByte: "9", rawType: "Int16" }
+    properties:
+      value:
+        { type: "Float32", floatEncoding: "eNotation", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+
+  -
+    name: "CC2650AccelerometerZData"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa81-0451-4000-b000-000000000000", startByte: "11", rawType: "Int16" }
+    properties:
+      value:
+        { type: "Float32", floatEncoding: "eNotation", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+  -
+    name: "CC2650MagnetometerConfiguration"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa82-0451-4000-b000-000000000000", bitShift: "6", rawType: "Uint16" }
+    properties:
+      value:
+        { type: "Bool", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+  -
+    name: "CC2650MagnetometerXData"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa81-0451-4000-b000-000000000000", startByte: "13", rawType: "Int16" }
+    properties:
+      value:
+        { type: "Float32", floatEncoding: "eNotation", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+
+  -
+    name: "CC2650MagnetometerYData"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa81-0451-4000-b000-000000000000", startByte: "15", rawType: "Int16" }
+    properties:
+      value:
+        { type: "Float32", floatEncoding: "eNotation", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+
+  -
+    name: "CC2650MagnetometerZData"
+    description: "I/O Configuration"
+    attributes:
+      { characteristicUuid: "f000aa81-0451-4000-b000-000000000000", startByte: "17", rawType: "Int16" }
+    properties:
+      value:
+        { type: "Float32", floatEncoding: "eNotation", readWrite: "RW" }
+      units:
+        { type: "String", readWrite: "R", defaultValue: "Mode" }
+
+deviceCommands:
+  -
+    name: "CC2650TemperatureConfiguration"
+    set:
+      - { operation: "set", object: "CC2650TemperatureConfiguration", property: "value" }
+  -
+    name: "CC2650TemperatureData"
+    get:
+      - { operation: "get", object: "CC2650TemperatureData", property: "value" }
+  -
+    name: "CC2650HumidityConfiguration"
+    set:
+      - { operation: "set", object: "CC2650HumidityConfiguration", property: "value" }
+  -
+    name: "CC2650HumidityData"
+    get:
+      - { operation: "get", object: "CC2650HumidityData", property: "value" }
+  -
+    name: "CC2650BarometricTemperatureConfiguration"
+    set:
+      - { operation: "set", object: "CC2650BarometricTemperatureConfiguration", property: "value" }
+  -
+    name: "CC2650BarometricTemperatureData"
+    get:
+      - { operation: "get", object: "CC2650BarometricTemperatureData", property: "value" }
+  -
+    name: "CC2650BarometricConfiguration"
+    set:
+      - { operation: "set", object: "CC2650BarometricConfiguration", property: "value" }
+  -
+    name: "CC2650BarometricData"
+    get:
+      - { operation: "get", object: "CC2650BarometricData", property: "value" }
+  -
+    name: "CC2650OpticalSensorConfiguration"
+    set:
+      - { operation: "set", object: "CC2650OpticalSensorConfiguration", property: "value" }
+  -
+    name: "CC2650OpticalSensorData"
+    get:
+      - { operation: "get", object: "CC2650OpticalSensorData", property: "value" }
+  -
+    name: "CC2650GyroscopeXConfiguration"
+    set:
+      - { operation: "set", object: "CC2650GyroscopeXConfiguration", property: "value" }
+  -
+    name: "CC2650GyroscopeXData"
+    get:
+      - { operation: "get", object: "CC2650GyroscopeXData", property: "value" }
+  -
+    name: "CC2650GyroscopeYConfiguration"
+    set:
+      - { operation: "set", object: "CC2650GyroscopeYConfiguration", property: "value" }
+  -
+    name: "CC2650GyroscopeYData"
+    get:
+      - { operation: "get", object: "CC2650GyroscopeYData", property: "value" }
+  -
+    name: "CC2650GyroscopeZConfiguration"
+    set:
+      - { operation: "set", object: "CC2650GyroscopeZConfiguration", property: "value" }
+  -
+    name: "CC2650GyroscopeZData"
+    get:
+      - { operation: "get", object: "CC2650GyroscopeZData", property: "value" }
+  -
+    name: "CC2650AccelerometerXConfiguration"
+    set:
+      - { operation: "set", object: "CC2650AccelerometerXConfiguration", property: "value" }
+  -
+    name: "CC2650AccelerometerXData"
+    get:
+      - { operation: "get", object: "CC2650AccelerometerXData", property: "value" }
+  -
+    name: "CC2650AccelerometerYConfiguration"
+    set:
+      - { operation: "set", object: "CC2650AccelerometerYConfiguration", property: "value" }
+  -
+    name: "CC2650AccelerometerYData"
+    get:
+      - { operation: "get", object: "CC2650AccelerometerYData", property: "value" }
+  -
+    name: "CC2650AccelerometerZConfiguration"
+    set:
+      - { operation: "set", object: "CC2650AccelerometerZConfiguration", property: "value" }
+  -
+    name: "CC2650AccelerometerZData"
+    get:
+      - { operation: "get", object: "CC2650AccelerometerZData", property: "value" }
+  -
+    name: "CC2650MagnetometerConfiguration"
+    set:
+      - { operation: "set", object: "CC2650MagnetometerConfiguration", property: "value" }
+  -
+    name: "CC2650MagnetometerXData"
+    get:
+      - { operation: "get", object: "CC2650MagnetometerXData", property: "value" }
+  -
+    name: "CC2650MagnetometerYData"
+    get:
+      - { operation: "get", object: "CC2650MagnetometerYData", property: "value" }
+  -
+    name: "CC2650MagnetometerZData"
+    get:
+      - { operation: "get", object: "CC2650MagnetometerZData", property: "value" }
+
+coreCommands:
+  -
+    name: "CC2650TemperatureConfiguration"
+    put:
+      path: "/api/v1/device/{deviceId}/CC2650TemperatureConfiguration"
+      parameterNames: ["CC2650TemperatureConfiguration"]
+      responses:
+        - code: "200"
+          description: ""
+        - code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650TemperatureData"
+    get:
+      path: "/api/v1/device/{deviceId}/CC2650TemperatureData"
+      responses:
+        -
+          code: "200"
+          description: ""
+          expectedValues: ["CC2650TemperatureData"]
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650HumidityConfiguration"
+    put:
+      path: "/api/v1/device/{deviceId}/HumidityConfiguration"
+      parameterNames: ["CC2650HumidityData"]
+      responses:
+        - code: "200"
+          description: ""
+        - code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650HumidityData"
+    get:
+      path: "/api/v1/device/{deviceId}/CC2650HumidityData"
+      responses:
+        -
+          code: "200"
+          description: ""
+          expectedValues: ["CC2650HumidityData"]
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650BarometricTemperatureConfiguration"
+    put:
+      path: "/api/v1/device/{deviceId}/CC2650BarometricTemperatureConfiguration"
+      parameterNames: ["CC2650BarometricTemperatureConfiguration"]
+      responses:
+        - code: "200"
+          description: ""
+        - code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650BarometricTemperatureData"
+    get:
+      path: "/api/v1/device/{deviceId}/CC2650BarometricTemperatureData"
+      responses:
+        -
+          code: "200"
+          description: ""
+          expectedValues: ["CC2650BarometricTemperatureData"]
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650BarometricConfiguration"
+    put:
+      path: "/api/v1/device/{deviceId}/CC2650BarometricConfiguration"
+      parameterNames: ["CC2650BarometricConfiguration"]
+      responses:
+        - code: "200"
+          description: ""
+        - code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650BarometricData"
+    get:
+      path: "/api/v1/device/{deviceId}/CC2650BarometricData"
+      responses:
+        -
+          code: "200"
+          description: ""
+          expectedValues: ["CC2650BarometricData"]
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650OpticalSensorConfiguration"
+    put:
+      path: "/api/v1/device/{deviceId}/CC2650OpticalSensorConfiguration"
+      parameterNames: ["CC2650OpticalSensorConfiguration"]
+      responses:
+        - code: "200"
+          description: ""
+        - code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650OpticalSensorData"
+    get:
+      path: "/api/v1/device/{deviceId}/CC2650OpticalSensorData"
+      responses:
+        -
+          code: "200"
+          description: ""
+          expectedValues: ["CC2650OpticalSensorData"]
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650GyroscopeXConfiguration"
+    put:
+      path: "/api/v1/device/{deviceId}/CC2650GyroscopeXConfiguration"
+      parameterNames: ["CC2650GyroscopeXConfiguration"]
+      responses:
+        - code: "200"
+          description: ""
+        - code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650GyroscopeXData"
+    get:
+      path: "/api/v1/device/{deviceId}/CC2650GyroscopeXData"
+      responses:
+        -
+          code: "200"
+          description: ""
+          expectedValues: ["CC2650GyroscopeXData"]
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650GyroscopeYConfiguration"
+    put:
+      path: "/api/v1/device/{deviceId}/CC2650GyroscopeYConfiguration"
+      parameterNames: ["CC2650GyroscopeYConfiguration"]
+      responses:
+        - code: "200"
+          description: ""
+        - code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650GyroscopeYData"
+    get:
+      path: "/api/v1/device/{deviceId}/CC2650GyroscopeYData"
+      responses:
+        -
+          code: "200"
+          description: ""
+          expectedValues: ["CC2650GyroscopeYData"]
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650GyroscopeZConfiguration"
+    put:
+      path: "/api/v1/device/{deviceId}/CC2650GyroscopeZConfiguration"
+      parameterNames: ["CC2650GyroscopeZConfiguration"]
+      responses:
+        - code: "200"
+          description: ""
+        - code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650GyroscopeZData"
+    get:
+      path: "/api/v1/device/{deviceId}/CC2650GyroscopeZData"
+      responses:
+        -
+          code: "200"
+          description: ""
+          expectedValues: ["CC2650GyroscopeZData"]
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650AccelerometerXConfiguration"
+    put:
+      path: "/api/v1/device/{deviceId}/CC2650AccelerometerXConfiguration"
+      parameterNames: ["CC2650AccelerometerXConfiguration"]
+      responses:
+        - code: "200"
+          description: ""
+        - code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650AccelerometerXData"
+    get:
+      path: "/api/v1/device/{deviceId}/CC2650AccelerometerXData"
+      responses:
+        -
+          code: "200"
+          description: ""
+          expectedValues: ["CC2650AccelerometerXData"]
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650AccelerometerYConfiguration"
+    put:
+      path: "/api/v1/device/{deviceId}/CC2650AccelerometerYConfiguration"
+      parameterNames: ["CC2650AccelerometerYConfiguration"]
+      responses:
+        - code: "200"
+          description: ""
+        - code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650AccelerometerYData"
+    get:
+      path: "/api/v1/device/{deviceId}/CC2650AccelerometerYData"
+      responses:
+        -
+          code: "200"
+          description: ""
+          expectedValues: ["CC2650AccelerometerYData"]
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650AccelerometerZConfiguration"
+    put:
+      path: "/api/v1/device/{deviceId}/CC2650AccelerometerZConfiguration"
+      parameterNames: ["CC2650AccelerometerZConfiguration"]
+      responses:
+        - code: "200"
+          description: ""
+        - code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650AccelerometerZData"
+    get:
+      path: "/api/v1/device/{deviceId}/CC2650AccelerometerZData"
+      responses:
+        -
+          code: "200"
+          description: ""
+          expectedValues: ["CC2650AccelerometerZData"]
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650MagnetometerConfiguration"
+    put:
+      path: "/api/v1/device/{deviceId}/CC2650MagnetometerConfiguration"
+      parameterNames: ["CC2650MagnetometerConfiguration"]
+      responses:
+        - code: "200"
+          description: ""
+        - code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650MagnetometerXData"
+    get:
+      path: "/api/v1/device/{deviceId}/CC2650MagnetometerXData"
+      responses:
+        -
+          code: "200"
+          description: ""
+          expectedValues: ["CC2650MagnetometerXData"]
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650MagnetometerYData"
+    get:
+      path: "/api/v1/device/{deviceId}/CC2650MagnetometerYData"
+      responses:
+        -
+          code: "200"
+          description: ""
+          expectedValues: ["CC2650MagnetometerYData"]
+        -
+          code: "503"
+          description: "service unavailable"
+          expectedValues: []
+  -
+    name: "CC2650MagnetometerZData"
+    get:
+      path: "/api/v1/device/{deviceId}/CC2650MagnetometerZData"
+      responses:
+        - code: "200"
+          description: ""
+          expectedValues: ["CC2650MagnetometerZData"]
+        - code: "503"
+          description: "service unavailable"
+          expectedValues: []
