@@ -44,4 +44,4 @@ COPY --from=builder /device-bluetooth-c/build/release/device-bluetooth-c/device-
 COPY res res/
 COPY profiles profiles/
 
-ENTRYPOINT ["./device-bluetooth-c"]
+ENTRYPOINT ["./device-bluetooth-c", "--registry", "consul://edgex-core-consul:8500"]
