@@ -23,5 +23,5 @@ if [ ! -d deps ]; then
   ./scripts/build.sh
   cp -rf include/* /usr/include/
   cp build/debug/c/libcsdk.so /usr/lib/
-  rm -rf /device-bluetooth-c/deps
+  rm -rf /device-ble-c/deps
 fi

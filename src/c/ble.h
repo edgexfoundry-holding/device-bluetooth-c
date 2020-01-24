@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef DEVICE_BLUETOOTH_C_BLE_H
-#define DEVICE_BLUETOOTH_C_BLE_H
+#ifndef DEVICE_BLE_C_BLE_H
+#define DEVICE_BLE_C_BLE_H
 
 #include <dbus/dbus.h>
 #include <pthread.h>
@@ -46,4 +46,4 @@ ble_write_gatt_characteristic (iot_logger_t *lc, DBusConnection *, char *, char 
 }
 #endif
 
-#endif //DEVICE_BLUETOOTH_C_BLE_H
+#endif //DEVICE_BLE_C_BLE_H

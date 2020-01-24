@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
-project(device-bluetooth-c LANGUAGES C)
+project(device-ble-c LANGUAGES C)
 
 # Package support
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
@@ -30,9 +30,9 @@ if (DEFINED CMAKE_C_COMPILER_ID)
 endif ()
 
 file(GLOB C_FILES src/c/*.c)
-add_executable(device-bluetooth-c ${C_FILES})
+add_executable(device-ble-c ${C_FILES})
 
 FILE(STRINGS "VERSION" VERSION_NUMBER)
 
-target_compile_definitions(device-bluetooth-c PRIVATE VERSION="${VERSION_NUMBER}")
-target_link_libraries(device-bluetooth-c PUBLIC ${DBUS_LIBRARIES} PRIVATE ${LIBCSDK_LIBRARIES})
+target_compile_definitions(device-ble-c PRIVATE VERSION="${VERSION_NUMBER}")
+target_link_libraries(device-ble-c PUBLIC ${DBUS_LIBRARIES} PRIVATE ${LIBCSDK_LIBRARIES})
