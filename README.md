@@ -138,3 +138,22 @@ $ docker run \
   -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
   --privileged -p 49971:49971 device-ble
 ```
+
+#### AppArmor
+ If you are running the device service on a system with AppArmor,
+ to be able to run the device service without requiring the `--privileged` 
+ flag please apply the provided security policy  `docker-ble-policy` 
+ using the command:
+ 
+```shell
+$ sudo apparmor_parser -r -W docker-ble-policy
+```
+
+If this security policy has been applied to the system, the `--security-opt` 
+flag replaces the  `--privileged` flag when running the device service:
+
+```shell
+$ docker run \
+  -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
+  --security-opt apparmor=docker-ble-policy -p 49971:49971 device-ble
+```
