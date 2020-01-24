@@ -35,20 +35,20 @@ under the `[Driver]` table.
 
 ```
 [Driver]
-  BluetoothInterface = "hci0"
-  BluetoothDiscoveryDuration = 20
+  BLE_Interface = "hci0"
+  BLE_DiscoveryDuration = 20
 ```
 
-#### BluetoothInterface
-BluetoothInterface specifies which Host Controller
+#### BLE_Interface
+BLE_Interface specifies which Host Controller
 Interface (HCI) the Device Service will use.
 You can find out, which interfaces are
 available with BlueZ ```hciconfig``` tool.
 
-#### BluetoothDiscoveryDuration
+#### BLE_DiscoveryDuration
 When the Device Service starts, Bluetooth
 discovery will be enabled for the time
-amount specified by BluetoothDiscoveryDuration
+amount specified by BLE_DiscoveryDuration
 (in seconds). After which, Bluetooth discovery
 will be disabled.
 
@@ -69,7 +69,7 @@ Service starts.
   Description = "TI SensorTag 2650 STK"
   Labels = [ "bluetooth" ]
   [DeviceList.Protocols]
-    [DeviceList.Protocols.Bluetooth]
+    [DeviceList.Protocols.BLE]
       MAC = "00:00:00:00:00:00"
 ```
 
