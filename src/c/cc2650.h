@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef DEVICE_BLUETOOTH_C_CC2650_H
-#define DEVICE_BLUETOOTH_C_CC2650_H
+#ifndef DEVICE_BLE_C_CC2650_H
+#define DEVICE_BLE_C_CC2650_H
 
 #include <edgex/edgex-base.h>
 
@@ -27,4 +27,4 @@ void convert_cc2650_magnetometer (void *, edgex_device_resultvalue *);
 
 void convert_cc2650_accelerometer_axis (void *, edgex_device_resultvalue *);
 
-#endif //DEVICE_BLUETOOTH_C_CC2650_H
+#endif //DEVICE_BLE_C_CC2650_H

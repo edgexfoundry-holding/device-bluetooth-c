@@ -6,10 +6,10 @@
  *
  */
 
-#include "bluetooth.h"
+#include "ble.h"
 
-static char *bluetooth_dbus_base_path;
-static unsigned int bluetooth_dbus_base_path_length;
+static char *ble_dbus_base_path;
+static unsigned int ble_dbus_base_path_length;
 
 static void replace_char (char *dst, char find, char replace)
 {
@@ -53,9 +53,9 @@ static DBusMessage *dbus_get_property (iot_logger_t *lc, DBusConnection *dbus_co
   return dbus_reply;
 }
 
-int bluetooth_initialize (iot_logger_t *lc, char *interface_name)
+int ble_initialize (iot_logger_t *lc, char *interface_name)
 {
-  iot_log_info (lc, "Using \"%s\" as bluetooth interface", interface_name);
+  iot_log_info (lc, "Using \"%s\" as ble interface", interface_name);
 
   DBusError dbus_error;
   dbus_error_init (&dbus_error);
@@ -66,10 +66,10 @@ int bluetooth_initialize (iot_logger_t *lc, char *interface_name)
     return -1;
   }
 
-  bluetooth_dbus_base_path_length = strlen ("/org/bluez/") + strlen (interface_name) + 1;
-  bluetooth_dbus_base_path = calloc (bluetooth_dbus_base_path_length, sizeof (char));
-  strcpy (bluetooth_dbus_base_path, "/org/bluez/");
-  strcat (bluetooth_dbus_base_path, interface_name);
+  ble_dbus_base_path_length = strlen ("/org/bluez/") + strlen (interface_name) + 1;
+  ble_dbus_base_path = calloc (ble_dbus_base_path_length, sizeof (char));
+  strcpy (ble_dbus_base_path, "/org/bluez/");
+  strcat (ble_dbus_base_path, interface_name);
 
   /* Setup private DBus connection */
   DBusConnection *dbus_conn = dbus_bus_get_private (DBUS_BUS_SYSTEM, &dbus_error);
@@ -80,7 +80,7 @@ int bluetooth_initialize (iot_logger_t *lc, char *interface_name)
   }
 
   int successful_init = 0;
-  if (bluetooth_disconnect_all_devices (lc, dbus_conn) == -1)
+  if (ble_disconnect_all_devices (lc, dbus_conn) == -1)
   {
     successful_init = -1;
   }
@@ -91,7 +91,7 @@ int bluetooth_initialize (iot_logger_t *lc, char *interface_name)
   return successful_init;
 }
 
-void bluetooth_stop (iot_logger_t *lc)
+void ble_stop (iot_logger_t *lc)
 {
   DBusError dbus_error;
   dbus_error_init (&dbus_error);
@@ -104,30 +104,30 @@ void bluetooth_stop (iot_logger_t *lc)
     iot_log_error (lc, "[D-Bus] %s %s", dbus_error.name, dbus_error.message);
     return;
   }
-  if (bluetooth_disconnect_all_devices (lc, dbus_conn) == -1)
+  if (ble_disconnect_all_devices (lc, dbus_conn) == -1)
   {
     iot_log_error (lc, "Couldn't disconnect all devices");
   }
-  free (bluetooth_dbus_base_path);
+  free (ble_dbus_base_path);
 
   /* Close and unref the private DBus connection */
   dbus_connection_close (dbus_conn);
   dbus_connection_unref (dbus_conn);
 }
 
-int bluetooth_set_discovery_mode (iot_logger_t *lc, enum bluetooth_discovery_mode discovery_mode)
+int ble_set_discovery_mode (iot_logger_t *lc, enum ble_discovery_mode discovery_mode)
 {
   DBusError dbus_error;
   dbus_error_init (&dbus_error);
 
   char dbus_cmd[] = "StartDiscovery";
 
-  if (discovery_mode == BLUETOOTH_DISCOVERY_OFF)
+  if (discovery_mode == BLE_DISCOVERY_OFF)
   {
     strcpy (dbus_cmd, "StopDiscovery");
   }
 
-  DBusMessage *dbus_msg = dbus_message_new_method_call ("org.bluez", bluetooth_dbus_base_path, "org.bluez.Adapter1",
+  DBusMessage *dbus_msg = dbus_message_new_method_call ("org.bluez", ble_dbus_base_path, "org.bluez.Adapter1",
                                                         dbus_cmd);
   if (dbus_msg == NULL)
   {
@@ -161,16 +161,16 @@ int bluetooth_set_discovery_mode (iot_logger_t *lc, enum bluetooth_discovery_mod
   return 0;
 }
 
-int bluetooth_is_device_connected (iot_logger_t *lc, DBusConnection *dbus_conn, char *mac)
+int ble_is_device_connected (iot_logger_t *lc, DBusConnection *dbus_conn, char *mac)
 {
   dbus_bool_t returned_bool;
-  unsigned int dbus_path_length = bluetooth_dbus_base_path_length + DBUS_DEVICE_MAC_LENGTH + 1;
+  unsigned int dbus_path_length = ble_dbus_base_path_length + DBUS_DEVICE_MAC_LENGTH + 1;
   char mac_formatted[strlen (mac) + 1];
   char dbus_path[dbus_path_length];
 
   strcpy (mac_formatted, mac);
   replace_char (mac_formatted, ':', '_');
-  snprintf (dbus_path, dbus_path_length, "%s/dev_%s", bluetooth_dbus_base_path, mac_formatted);
+  snprintf (dbus_path, dbus_path_length, "%s/dev_%s", ble_dbus_base_path, mac_formatted);
 
   DBusMessage *dbus_property_reply = dbus_get_property (lc, dbus_conn, &returned_bool, dbus_path, "org.bluez.Device1",
                                                         "Connected");
@@ -183,18 +183,18 @@ int bluetooth_is_device_connected (iot_logger_t *lc, DBusConnection *dbus_conn, 
   return (int) returned_bool;
 }
 
-int bluetooth_connect_device (iot_logger_t *lc, DBusConnection *dbus_conn, char *mac)
+int ble_connect_device (iot_logger_t *lc, DBusConnection *dbus_conn, char *mac)
 {
   DBusError dbus_error;
   dbus_error_init (&dbus_error);
 
-  unsigned int dbus_path_length = bluetooth_dbus_base_path_length + DBUS_DEVICE_MAC_LENGTH + 1;
+  unsigned int dbus_path_length = ble_dbus_base_path_length + DBUS_DEVICE_MAC_LENGTH + 1;
   char mac_formatted[strlen (mac) + 1];
   char dbus_path[dbus_path_length];
 
   strcpy (mac_formatted, mac);
   replace_char (mac_formatted, ':', '_');
-  snprintf (dbus_path, dbus_path_length, "%s/dev_%s", bluetooth_dbus_base_path, mac_formatted);
+  snprintf (dbus_path, dbus_path_length, "%s/dev_%s", ble_dbus_base_path, mac_formatted);
 
   DBusMessage *dbus_msg = dbus_message_new_method_call ("org.bluez", dbus_path, "org.bluez.Device1", "Connect");
   if (dbus_msg == NULL)
@@ -228,7 +228,7 @@ int bluetooth_connect_device (iot_logger_t *lc, DBusConnection *dbus_conn, char 
   return 0;
 }
 
-static int bluetooth_disconnect_device (iot_logger_t *lc, DBusConnection *dbus_conn, char *dbus_device_path)
+static int ble_disconnect_device (iot_logger_t *lc, DBusConnection *dbus_conn, char *dbus_device_path)
 {
   DBusError dbus_error;
   dbus_error_init (&dbus_error);
@@ -261,7 +261,7 @@ static int bluetooth_disconnect_device (iot_logger_t *lc, DBusConnection *dbus_c
   return 0;
 }
 
-int bluetooth_disconnect_all_devices (iot_logger_t *lc, DBusConnection *dbus_conn)
+int ble_disconnect_all_devices (iot_logger_t *lc, DBusConnection *dbus_conn)
 {
   DBusError dbus_error;
   dbus_error_init (&dbus_error);
@@ -296,12 +296,12 @@ int bluetooth_disconnect_all_devices (iot_logger_t *lc, DBusConnection *dbus_con
     dbus_message_iter_recurse (&dbus_path_iter, &dictIter);
     dbus_message_iter_get_basic (&dictIter, &dbus_object_path);
 
-    if (strcmp (dbus_object_path, bluetooth_dbus_base_path) == 0)
+    if (strcmp (dbus_object_path, ble_dbus_base_path) == 0)
     {
       continue;
     }
 
-    if (strlen (dbus_object_path) != strlen (bluetooth_dbus_base_path) + DBUS_DEVICE_MAC_LENGTH)
+    if (strlen (dbus_object_path) != strlen (ble_dbus_base_path) + DBUS_DEVICE_MAC_LENGTH)
     {
       continue;
     }
@@ -318,7 +318,7 @@ int bluetooth_disconnect_all_devices (iot_logger_t *lc, DBusConnection *dbus_con
 
     if (is_device_connected)
     {
-      bluetooth_disconnect_device (lc, dbus_conn, dbus_object_path);
+      ble_disconnect_device (lc, dbus_conn, dbus_object_path);
     }
   }
 
@@ -414,7 +414,7 @@ static char *get_gatt_characteristic_dbus_path (iot_logger_t *lc, DBusConnection
   return dbus_object_path;
 }
 
-int bluetooth_read_gatt_characteristic (iot_logger_t *lc, DBusConnection *dbus_conn, char *mac,
+int ble_read_gatt_characteristic (iot_logger_t *lc, DBusConnection *dbus_conn, char *mac,
                                         char *characteristic_uuid, void **byte_array_dst,
                                         unsigned int *byte_array_dst_size)
 {
@@ -487,7 +487,7 @@ int bluetooth_read_gatt_characteristic (iot_logger_t *lc, DBusConnection *dbus_c
   return 0;
 }
 
-int bluetooth_write_gatt_characteristic (iot_logger_t *lc, DBusConnection *dbus_conn, char *mac,
+int ble_write_gatt_characteristic (iot_logger_t *lc, DBusConnection *dbus_conn, char *mac,
                                          char *characteristic_uuid, const void *data, unsigned int data_size)
 {
   char mac_formatted[strlen (mac) + 1];
