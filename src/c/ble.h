@@ -21,8 +21,8 @@ extern "C" {
 
 enum ble_discovery_mode
 {
-  ble_DISCOVERY_ON,
-  ble_DISCOVERY_OFF
+  BLE_DISCOVERY_ON,
+  BLE_DISCOVERY_OFF
 };
 
 int ble_initialize (iot_logger_t *, char *);

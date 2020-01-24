@@ -122,7 +122,7 @@ int ble_set_discovery_mode (iot_logger_t *lc, enum ble_discovery_mode discovery_
 
   char dbus_cmd[] = "StartDiscovery";
 
-  if (discovery_mode == ble_DISCOVERY_OFF)
+  if (discovery_mode == BLE_DISCOVERY_OFF)
   {
     strcpy (dbus_cmd, "StopDiscovery");
   }

@@ -99,9 +99,9 @@ static bool ble_init_handler (void *impl, struct iot_logger_t *lc, const edgex_n
   }
 
   iot_log_info (driver->lc, "Discovering devices for %d seconds", ble_discovery_duration);
-  ble_set_discovery_mode (driver->lc, ble_DISCOVERY_ON);
+  ble_set_discovery_mode (driver->lc, BLE_DISCOVERY_ON);
   sleep (ble_discovery_duration);
-  ble_set_discovery_mode (driver->lc, ble_DISCOVERY_OFF);
+  ble_set_discovery_mode (driver->lc, BLE_DISCOVERY_OFF);
   iot_log_info (driver->lc, "Finished discovering devices");
 
   initialize_conversions ();
