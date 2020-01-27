@@ -37,6 +37,7 @@ RUN apk add --update --no-cache \
 COPY --from=builder /usr/lib/libcsdk.so /usr/lib
 COPY --from=builder /usr/include/edgex /usr/include/edgex
 COPY --from=builder /usr/include/iot /usr/include/iot
+COPY --from=builder /usr/share/doc/edgex-csdk /usr/share/doc/edgex-csdk
 COPY --from=builder /usr/local/lib/libcbor* /usr/local/lib/
 
 COPY --from=builder /device-bluetooth-c/build/release/device-bluetooth-c/device-bluetooth-c device-bluetooth-c
