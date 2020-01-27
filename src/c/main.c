@@ -720,90 +720,32 @@ static void ble_stop_handler (void *impl, bool force)
   free_conversions ();
 }
 
-static bool parse_args (int argc, char *argv[], int *args_position, const char *parameter_shortname,
-                        const char *parameter_longname, char **return_value)
-{
-  if (strcmp (argv[*args_position], parameter_shortname) == 0 || strcmp (argv[*args_position], parameter_longname) == 0)
-  {
-    if (*args_position < argc - 1)
-    {
-      (*args_position)++;
-      *return_value = argv[*args_position];
-      (*args_position)++;
-      return true;
-    }
-    else
-    {
-      printf ("Option %s requires an argument\n", argv[*args_position]);
-      exit (0);
-    }
-  }
-
-  char *equal_symbol_position = strchr (argv[*args_position], '=');
-  if (equal_symbol_position)
-  {
-    if (strncmp (argv[*args_position], parameter_shortname, equal_symbol_position - argv[*args_position]) == 0 ||
-        strncmp (argv[*args_position], parameter_longname, equal_symbol_position - argv[*args_position]) == 0)
-    {
-      if (strlen (++equal_symbol_position))
-      {
-        *return_value = equal_symbol_position;
-        (*args_position)++;
-        return true;
-      }
-      else
-      {
-        printf ("Option %s requires an argument\n", argv[*args_position]);
-        exit (0);
-      }
-    }
-  }
-  return false;
-}
-
-static void usage (void)
-{
-  printf ("Options: \n");
-  printf ("   -h, --help           : Show this text\n");
-  printf ("   -r, --registry       : Use the registry service\n");
-  printf ("   -p, --profile <name> : Set the profile name\n");
-  printf ("   -c, --confdir <dir>  : Set the configuration directory\n");
-}
-
 int main (int argc, char *argv[])
 {
-  char *profile = "";
-  char *confdir = "";
-  char *service_name = "device-ble";
-  char *regURL = getenv ("EDGEX_REGISTRY");
+  edgex_device_svcparams params = {"device-ble",
+                                   NULL,
+                                   getenv ("EDGEX_REGISTRY"),
+                                   NULL};
+
+  if (!edgex_device_service_processparams (&argc, argv, &params))
+  {
+      return false;
+  }
 
   int n = 1;
   while (n < argc)
   {
-    if (strcmp (argv[n], "-h") == 0 || strcmp (argv[n], "--help") == 0)
-    {
-      usage ();
-      return 0;
-    }
-    if (parse_args (argc, argv, &n, "-r", "--registry", &regURL))
-    {
-      continue;
-    }
-    if (parse_args (argc, argv, &n, "-n", "--name", &service_name))
-    {
-      continue;
-    }
-    if (parse_args (argc, argv, &n, "-p", "--profile", &profile))
-    {
-      continue;
-    }
-    if (parse_args (argc, argv, &n, "-c", "--confdir", &confdir))
-    {
-      continue;
-    }
-    printf ("Unknown option %s\n", argv[n]);
-    usage ();
-    return 0;
+      if (strcmp (argv[n], "-h") == 0 || strcmp (argv[n], "--help") == 0)
+      {
+          printf ("Options:\n");
+          printf ("  -h, --help\t\t: Show this text\n");
+          edgex_device_service_usage ();
+          return false;
+
+      }else{
+          printf ("%s: Unrecognized option %s\n", argv[0], argv[n]);
+          return false;
+      }
   }
 
   ble_driver *impl = malloc (sizeof (ble_driver));
@@ -822,10 +764,10 @@ int main (int argc, char *argv[])
       ble_stop_handler
     };
 
-  edgex_device_service *service = edgex_device_service_new (service_name, VERSION, impl, ble_impls, &e);
+  edgex_device_service *service = edgex_device_service_new (params.svcname, VERSION, impl, ble_impls, &e);
   BLE_ERR_CHECK (e)
 
-  edgex_device_service_start (service, regURL, profile, confdir, &e);
+  edgex_device_service_start (service, params.regURL, params.profile, params.confdir, &e);
   BLE_ERR_CHECK (e)
 
   signal (SIGINT, ble_signal_handler);
