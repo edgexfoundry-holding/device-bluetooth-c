@@ -9,8 +9,9 @@ if [ ! -d deps ]; then
 
   # install libcbor used for building the SDK
   git clone https://github.com/PJK/libcbor
-  sed -e 's/-flto//' -i libcbor/CMakeLists.txt
   cd libcbor
+  git checkout v0.5.0
+  sed -e 's/-flto//' -i CMakeLists.txt
   cmake -DCMAKE_BUILD_TYPE=Release -DCBOR_CUSTOM_ALLOC=ON -DCMAKE_INSTALL_LIBDIR=lib .
   make
   make install
