@@ -7,27 +7,27 @@
  */
 
 #include "edgex/devsdk.h"
-#include "bluetooth.h"
+#include "ble.h"
 #include "conversion.h"
 
 #include <signal.h>
 #include <semaphore.h>
 
-#define ERR_CHECK(x) if (x.code) { fprintf (stderr, "Error: %d: %s\n", x.code, x.reason); return x.code; }
+#define BLE_ERR_CHECK(x) if (x.code) { fprintf (stderr, "Error: %d: %s\n", x.code, x.reason); return x.code; }
 
-static sem_t bt_sem;
+static sem_t ble_sem;
 
-typedef struct bt_driver
+typedef struct ble_driver
 {
   iot_logger_t *lc;
-} bt_driver;
+} ble_driver;
 
-static void bt_signal_handler (int i)
+static void ble_signal_handler (int i)
 {
-  sem_post (&bt_sem);
+  sem_post (&ble_sem);
 }
 
-static char *bt_get_protocol_property (const edgex_protocols *protocols, char *protocol_name, char *name)
+static char *ble_get_protocol_property (const edgex_protocols *protocols, char *protocol_name, char *name)
 {
   const edgex_protocols *protocol;
   for (protocol = protocols; protocol; protocol = protocol->next)
@@ -47,23 +47,23 @@ static char *bt_get_protocol_property (const edgex_protocols *protocols, char *p
   return NULL;
 }
 
-static bool bt_init (void *impl, struct iot_logger_t *lc, const edgex_nvpairs *config)
+static bool ble_init_handler (void *impl, struct iot_logger_t *lc, const edgex_nvpairs *config)
 {
-  bt_driver *driver = (bt_driver *) impl;
+  ble_driver *driver = (ble_driver *) impl;
   driver->lc = lc;
-  char *bt_interface_name = NULL;
-  unsigned int bt_discovery_duration = 10;
+  char *ble_interface_name = NULL;
+  unsigned int ble_discovery_duration = 10;
   const edgex_nvpairs *current_config = config;
 
   iot_log_info (driver->lc, "Start Init Process");
 
   while (current_config != NULL)
   {
-    if (strcmp (current_config->name, "BluetoothInterface") == 0)
+    if (strcmp (current_config->name, "BLE_Interface") == 0)
     {
-      bt_interface_name = current_config->value;
+      ble_interface_name = current_config->value;
     }
-    else if (strcmp (current_config->name, "BluetoothDiscoveryDuration") == 0)
+    else if (strcmp (current_config->name, "BLE_DiscoveryDuration") == 0)
     {
       char *invalid_chars = NULL;
       long int converted_value = strtol (current_config->value, &invalid_chars, 10);
@@ -82,26 +82,26 @@ static bool bt_init (void *impl, struct iot_logger_t *lc, const edgex_nvpairs *c
         return false;
       }
 
-      bt_discovery_duration = converted_value;
+      ble_discovery_duration = converted_value;
     }
     current_config = current_config->next;
   }
 
-  if (bt_interface_name == NULL)
+  if (ble_interface_name == NULL)
   {
-    iot_log_error (driver->lc, "BluetoothInterface [Driver] option is missing from config file");
+    iot_log_error (driver->lc, "BLE_Interface [Driver] option is missing from config file");
     return false;
   }
 
-  if (bluetooth_initialize (lc, bt_interface_name) == -1)
+  if (ble_initialize (lc, ble_interface_name) == -1)
   {
     return false;
   }
 
-  iot_log_info (driver->lc, "Discovering devices for %d seconds", bt_discovery_duration);
-  bluetooth_set_discovery_mode (driver->lc, BLUETOOTH_DISCOVERY_ON);
-  sleep (bt_discovery_duration);
-  bluetooth_set_discovery_mode (driver->lc, BLUETOOTH_DISCOVERY_OFF);
+  iot_log_info (driver->lc, "Discovering devices for %d seconds", ble_discovery_duration);
+  ble_set_discovery_mode (driver->lc, BLE_DISCOVERY_ON);
+  sleep (ble_discovery_duration);
+  ble_set_discovery_mode (driver->lc, BLE_DISCOVERY_OFF);
   iot_log_info (driver->lc, "Finished discovering devices");
 
   initialize_conversions ();
@@ -123,17 +123,17 @@ static bool is_out_of_bounds (iot_logger_t *lc, unsigned int start_byte, unsigne
   return out_of_bounds;
 }
 
-static bool bt_get_handler (void *impl, const char *devname, const edgex_protocols *protocols, uint32_t nreadings,
+static bool ble_get_handler (void *impl, const char *devname, const edgex_protocols *protocols, uint32_t nreadings,
                             const edgex_device_commandrequest *requests, edgex_device_commandresult *readings)
 {
   bool successful_get_request = true;
 
-  bt_driver *driver = (bt_driver *) impl;
-  char *mac_address = bt_get_protocol_property (protocols, "Bluetooth", "MAC");
+  ble_driver *driver = (ble_driver *) impl;
+  char *mac_address = ble_get_protocol_property (protocols, "BLE", "MAC");
 
   if (mac_address == NULL)
   {
-    iot_log_error (driver->lc, "%s [DeviceList.Protocols.Bluetooth], MAC option is missing", devname);
+    iot_log_error (driver->lc, "%s [DeviceList.Protocols.BLE], MAC option is missing", devname);
     return false;
   }
 
@@ -205,16 +205,16 @@ static bool bt_get_handler (void *impl, const char *devname, const edgex_protoco
       break;
     }
 
-    if (bluetooth_is_device_connected (driver->lc, dbus_conn, mac_address) == false)
+    if (ble_is_device_connected (driver->lc, dbus_conn, mac_address) == false)
     {
-      if (bluetooth_connect_device (driver->lc, dbus_conn, mac_address) == -1)
+      if (ble_connect_device (driver->lc, dbus_conn, mac_address) == -1)
       {
         successful_get_request = false;
         break;
       }
     }
 
-    int successful_read = bluetooth_read_gatt_characteristic (driver->lc, dbus_conn, mac_address, characteristic_uuid,
+    int successful_read = ble_read_gatt_characteristic (driver->lc, dbus_conn, mac_address, characteristic_uuid,
                                                               &byte_array, &byte_array_size);
 
     if (successful_read == -1)
@@ -451,16 +451,16 @@ static bool bt_get_handler (void *impl, const char *devname, const edgex_protoco
   return successful_get_request;
 }
 
-static bool bt_put_handler (void *impl, const char *devname, const edgex_protocols *protocols, uint32_t nvalues,
+static bool ble_put_handler (void *impl, const char *devname, const edgex_protocols *protocols, uint32_t nvalues,
                             const edgex_device_commandrequest *requests, const edgex_device_commandresult *values)
 {
-  bt_driver *driver = (bt_driver *) impl;
-  char *mac_address = bt_get_protocol_property (protocols, "Bluetooth", "MAC");
+  ble_driver *driver = (ble_driver *) impl;
+  char *mac_address = ble_get_protocol_property (protocols, "BLE", "MAC");
   bool successful_put_request = true;
 
   if (mac_address == NULL)
   {
-    iot_log_error (driver->lc, "%s [DeviceList.Protocols.Bluetooth], MAC option is missing", devname);
+    iot_log_error (driver->lc, "%s [DeviceList.Protocols.BLE], MAC option is missing", devname);
     return false;
   }
 
@@ -529,9 +529,9 @@ static bool bt_put_handler (void *impl, const char *devname, const edgex_protoco
       break;
     }
 
-    if (bluetooth_is_device_connected (driver->lc, dbus_conn, mac_address) == false)
+    if (ble_is_device_connected (driver->lc, dbus_conn, mac_address) == false)
     {
-      if (bluetooth_connect_device (driver->lc, dbus_conn, mac_address) == -1)
+      if (ble_connect_device (driver->lc, dbus_conn, mac_address) == -1)
       {
         successful_put_request = false;
         break;
@@ -547,7 +547,7 @@ static bool bt_put_handler (void *impl, const char *devname, const edgex_protoco
         uint8_t data = (uint8_t) values[i].value.bool_result;
         data <<= bit_shift;
 
-        successful_write = bluetooth_write_gatt_characteristic (driver->lc, dbus_conn, mac_address, characteristic_uuid,
+        successful_write = ble_write_gatt_characteristic (driver->lc, dbus_conn, mac_address, characteristic_uuid,
                                                                 &data, sizeof (uint8_t));
       }
       else if (strcmp (raw_type, "Uint16") == 0)
@@ -555,7 +555,7 @@ static bool bt_put_handler (void *impl, const char *devname, const edgex_protoco
         uint16_t data = (uint16_t) values[i].value.bool_result;
         data <<= bit_shift;
 
-        successful_write = bluetooth_write_gatt_characteristic (driver->lc, dbus_conn, mac_address, characteristic_uuid,
+        successful_write = ble_write_gatt_characteristic (driver->lc, dbus_conn, mac_address, characteristic_uuid,
                                                                 &data, sizeof (uint16_t));
       }
       else if (strcmp (raw_type, "Uint32") == 0)
@@ -563,7 +563,7 @@ static bool bt_put_handler (void *impl, const char *devname, const edgex_protoco
         uint32_t data = (uint32_t) values[i].value.bool_result;
         data <<= bit_shift;
 
-        successful_write = bluetooth_write_gatt_characteristic (driver->lc, dbus_conn, mac_address, characteristic_uuid,
+        successful_write = ble_write_gatt_characteristic (driver->lc, dbus_conn, mac_address, characteristic_uuid,
                                                                 &data, sizeof (uint32_t));
       }
       else if (strcmp (raw_type, "Uint64") == 0)
@@ -571,7 +571,7 @@ static bool bt_put_handler (void *impl, const char *devname, const edgex_protoco
         uint64_t data = (uint64_t) values[i].value.bool_result;
         data <<= bit_shift;
 
-        successful_write = bluetooth_write_gatt_characteristic (driver->lc, dbus_conn, mac_address, characteristic_uuid,
+        successful_write = ble_write_gatt_characteristic (driver->lc, dbus_conn, mac_address, characteristic_uuid,
                                                                 &data, sizeof (uint64_t));
       }
       else
@@ -586,13 +586,13 @@ static bool bt_put_handler (void *impl, const char *devname, const edgex_protoco
         case Bool:
         {
           bool bool_value = values[i].value.bool_result;
-          successful_write = bluetooth_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
+          successful_write = ble_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
                                                                   characteristic_uuid,
                                                                   &bool_value, sizeof (bool));
           break;
         }
         case Binary:
-          successful_write = bluetooth_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
+          successful_write = ble_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
                                                                   characteristic_uuid,
                                                                   values[i].value.binary_result.bytes,
                                                                   values[i].value.binary_result.size);
@@ -601,7 +601,7 @@ static bool bt_put_handler (void *impl, const char *devname, const edgex_protoco
         case String:
         {
           char *string_value = values[i].value.string_result;
-          successful_write = bluetooth_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
+          successful_write = ble_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
                                                                   characteristic_uuid,
                                                                   string_value,
                                                                   (strlen (string_value) + 1) * sizeof (char));
@@ -610,7 +610,7 @@ static bool bt_put_handler (void *impl, const char *devname, const edgex_protoco
         case Uint8:
         {
           uint8_t uint8_value = values[i].value.ui8_result;
-          successful_write = bluetooth_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
+          successful_write = ble_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
                                                                   characteristic_uuid,
                                                                   &uint8_value, sizeof (uint8_t));
           break;
@@ -618,7 +618,7 @@ static bool bt_put_handler (void *impl, const char *devname, const edgex_protoco
         case Uint16:
         {
           uint16_t uint16_value = values[i].value.ui16_result;
-          successful_write = bluetooth_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
+          successful_write = ble_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
                                                                   characteristic_uuid,
                                                                   &uint16_value, sizeof (uint16_t));
           break;
@@ -626,7 +626,7 @@ static bool bt_put_handler (void *impl, const char *devname, const edgex_protoco
         case Uint32:
         {
           uint32_t uint32_value = values[i].value.ui32_result;
-          successful_write = bluetooth_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
+          successful_write = ble_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
                                                                   characteristic_uuid,
                                                                   &uint32_value, sizeof (uint32_t));
           break;
@@ -634,7 +634,7 @@ static bool bt_put_handler (void *impl, const char *devname, const edgex_protoco
         case Uint64:
         {
           uint64_t uint64_value = values[i].value.ui64_result;
-          successful_write = bluetooth_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
+          successful_write = ble_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
                                                                   characteristic_uuid,
                                                                   &uint64_value, sizeof (uint64_t));
           break;
@@ -642,7 +642,7 @@ static bool bt_put_handler (void *impl, const char *devname, const edgex_protoco
         case Int8:
         {
           int8_t int8_value = values[i].value.i8_result;
-          successful_write = bluetooth_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
+          successful_write = ble_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
                                                                   characteristic_uuid,
                                                                   &int8_value, sizeof (int8_t));
           break;
@@ -650,7 +650,7 @@ static bool bt_put_handler (void *impl, const char *devname, const edgex_protoco
         case Int16:
         {
           int16_t int16_value = values[i].value.i16_result;
-          successful_write = bluetooth_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
+          successful_write = ble_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
                                                                   characteristic_uuid,
                                                                   &int16_value, sizeof (int16_t));
           break;
@@ -658,7 +658,7 @@ static bool bt_put_handler (void *impl, const char *devname, const edgex_protoco
         case Int32:
         {
           int32_t int32_value = values[i].value.i32_result;
-          successful_write = bluetooth_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
+          successful_write = ble_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
                                                                   characteristic_uuid,
                                                                   &int32_value, sizeof (int32_t));
           break;
@@ -666,7 +666,7 @@ static bool bt_put_handler (void *impl, const char *devname, const edgex_protoco
         case Int64:
         {
           int64_t int64_value = values[i].value.i64_result;
-          successful_write = bluetooth_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
+          successful_write = ble_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
                                                                   characteristic_uuid,
                                                                   &int64_value, sizeof (int64_t));
           break;
@@ -674,7 +674,7 @@ static bool bt_put_handler (void *impl, const char *devname, const edgex_protoco
         case Float32:
         {
           float float_value = values[i].value.f32_result;
-          successful_write = bluetooth_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
+          successful_write = ble_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
                                                                   characteristic_uuid,
                                                                   &float_value, sizeof (float));
           break;
@@ -682,7 +682,7 @@ static bool bt_put_handler (void *impl, const char *devname, const edgex_protoco
         case Float64:
         {
           double double_value = values[i].value.f64_result;
-          successful_write = bluetooth_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
+          successful_write = ble_write_gatt_characteristic (driver->lc, dbus_conn, mac_address,
                                                                   characteristic_uuid,
                                                                   &double_value, sizeof (double));
           break;
@@ -708,15 +708,15 @@ static bool bt_put_handler (void *impl, const char *devname, const edgex_protoco
   return successful_put_request;
 }
 
-static bool bt_disconnect (void *impl, edgex_protocols *device)
+static bool ble_disconnect_handler (void *impl, edgex_protocols *device)
 {
   return true;
 }
 
-static void bt_stop (void *impl, bool force)
+static void ble_stop_handler (void *impl, bool force)
 {
-  bt_driver *driver = (bt_driver *) impl;
-  bluetooth_stop (driver->lc);
+  ble_driver *driver = (ble_driver *) impl;
+  ble_stop (driver->lc);
   free_conversions ();
 }
 
@@ -774,7 +774,7 @@ int main (int argc, char *argv[])
 {
   char *profile = "";
   char *confdir = "";
-  char *service_name = "device-bt";
+  char *service_name = "device-ble";
   char *regURL = getenv ("EDGEX_REGISTRY");
 
   int n = 1;
@@ -806,38 +806,38 @@ int main (int argc, char *argv[])
     return 0;
   }
 
-  bt_driver *impl = malloc (sizeof (bt_driver));
-  memset (impl, 0, sizeof (bt_driver));
+  ble_driver *impl = malloc (sizeof (ble_driver));
+  memset (impl, 0, sizeof (ble_driver));
 
   edgex_error e;
   e.code = 0;
 
-  edgex_device_callbacks bt_impls =
+  edgex_device_callbacks ble_impls =
     {
-      bt_init,
+      ble_init_handler,
       NULL,
-      bt_get_handler,
-      bt_put_handler,
-      bt_disconnect,
-      bt_stop
+      ble_get_handler,
+      ble_put_handler,
+      ble_disconnect_handler,
+      ble_stop_handler
     };
 
-  edgex_device_service *service = edgex_device_service_new (service_name, VERSION, impl, bt_impls, &e);
-  ERR_CHECK (e)
+  edgex_device_service *service = edgex_device_service_new (service_name, VERSION, impl, ble_impls, &e);
+  BLE_ERR_CHECK (e)
 
   edgex_device_service_start (service, regURL, profile, confdir, &e);
-  ERR_CHECK (e)
+  BLE_ERR_CHECK (e)
 
-  signal (SIGINT, bt_signal_handler);
-  signal (SIGTERM, bt_signal_handler);
+  signal (SIGINT, ble_signal_handler);
+  signal (SIGTERM, ble_signal_handler);
 
-  sem_init (&bt_sem, 0, 0);
-  sem_wait (&bt_sem);
+  sem_init (&ble_sem, 0, 0);
+  sem_wait (&ble_sem);
 
   edgex_device_service_stop (service, true, &e);
-  ERR_CHECK (e)
+  BLE_ERR_CHECK (e)
 
-  sem_destroy (&bt_sem);
+  sem_destroy (&ble_sem);
   edgex_device_service_free (service);
   free (impl);
   return 0;

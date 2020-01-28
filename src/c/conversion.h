@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef DEVICE_BLUETOOTH_C_CONVERSION_H
-#define DEVICE_BLUETOOTH_C_CONVERSION_H
+#ifndef DEVICE_BLE_C_CONVERSION_H
+#define DEVICE_BLE_C_CONVERSION_H
 
 #include "cc2650.h"
 #include <edgex/edgex-base.h>
@@ -22,4 +22,4 @@ bool apply_conversion_to_value (iot_logger_t *, const char *, void *, edgex_devi
 
 void free_conversions (void);
 
-#endif //DEVICE_BLUETOOTH_C_CONVERSION_H
+#endif //DEVICE_BLE_C_CONVERSION_H

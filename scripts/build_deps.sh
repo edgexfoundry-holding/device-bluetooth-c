@@ -25,5 +25,5 @@ if [ ! -d deps ]; then
   cp build/debug/c/libcsdk.so /usr/lib/
   mkdir -p /usr/share/doc/edgex-csdk
   cp Attribution.txt /usr/share/doc/edgex-csdk
-  rm -rf /device-bluetooth-c/deps
+  rm -rf /device-ble-c/deps
 fi

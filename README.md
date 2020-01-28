@@ -1,5 +1,5 @@
-# Bluetooth Device Service
-The Bluetooth Device Service connects Bluetooth
+# BLE Device Service
+The BLE Device Service connects Bluetooth Low Energy
 devices with EdgeX. The Device Service
 currently limited to Bluetooth GATT devices/profiles.
 
@@ -20,12 +20,12 @@ machine.
 - [D-Bus](https://www.freedesktop.org/wiki/Software/dbus/) -
 D-Bus daemon is required to be running on the host machine
 alongside the Device Service to allow communication
-between the Bluetooth Device Service and the BlueZ daemon.
+between the BLE Device Service and the BlueZ daemon.
  
 - [BlueZ](http://www.bluez.org/) -
 BlueZ Linux module is required to be installed on the host
 machine. This allows the connection between the Device Service
-and Bluetooth devices using D-Bus.
+and BLE devices using D-Bus.
 
 ## Configuration File
 
@@ -35,25 +35,25 @@ under the `[Driver]` table.
 
 ```
 [Driver]
-  BluetoothInterface = "hci0"
-  BluetoothDiscoveryDuration = 20
+  BLE_Interface = "hci0"
+  BLE_DiscoveryDuration = 20
 ```
 
-#### BluetoothInterface
-BluetoothInterface specifies which Host Controller
+#### BLE_Interface
+BLE_Interface specifies which Host Controller
 Interface (HCI) the Device Service will use.
 You can find out, which interfaces are
 available with BlueZ ```hciconfig``` tool.
 
-#### BluetoothDiscoveryDuration
+#### BLE_DiscoveryDuration
 When the Device Service starts, Bluetooth
 discovery will be enabled for the time
-amount specified by BluetoothDiscoveryDuration
+amount specified by BLE_DiscoveryDuration
 (in seconds). After which, Bluetooth discovery
 will be disabled.
 
 ## Adding A Device
-To add a new Bluetooth device to the Device
+To add a new BLE device to the Device
 Service, insert the layout below into the
 configuration.toml file. Update the Name,
 Profile, Description, Mac to match the device
@@ -69,7 +69,7 @@ Service starts.
   Description = "TI SensorTag 2650 STK"
   Labels = [ "bluetooth" ]
   [DeviceList.Protocols]
-    [DeviceList.Protocols.Bluetooth]
+    [DeviceList.Protocols.BLE]
       MAC = "00:00:00:00:00:00"
 ```
 
@@ -86,8 +86,8 @@ $ ./scripts/build.sh
 ## Run
 After successfully building the Device Service,
 you should have the Device Service executable
-in `./build/release/device-bluetooth-c/` named
-`device-bluetooth-c`. To run this executable,
+in `./build/release/device-ble-c/` named
+`device-ble-c`. To run this executable,
 make sure your current directory is the root
 project directory. As the Device Service
 executable requires the configuration.toml in
@@ -96,7 +96,7 @@ executable requires the configuration.toml in
 Run the following command in shell to start
 the Device Service
 
-```./build/release/device-bluetooth-c/device-bluetooth-c```
+```./build/release/device-ble-c/device-ble-c```
 
 
 #### Command Line Options
@@ -108,7 +108,7 @@ the Device Service
 |--confdir  | -c                | Set the configuration directory |
 
 An example of using a command line option from the table above.
-```./build/release/device-bluetooth-c/device-bluetooth-c -c res/```
+```./build/release/device-ble-c/device-ble-c -c res/```
 
 ## Docker
 
@@ -118,7 +118,7 @@ clone the repository and enter the following
 shell commands.
 ```shell
 $ cd device-bluetooth-c
-$ docker build -t device-bluetooth \
+$ docker build -t device-ble \
   -f ./scripts/Dockerfile.alpine-3.9 \
   --build-arg arch=$(uname -m) .
 ```
@@ -136,5 +136,24 @@ container and the host machine D-Bus.
 ```shell
 $ docker run \
   -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
-  --privileged -p 49971:49971 device-bluetooth
+  --privileged -p 49971:49971 device-ble
+```
+
+#### AppArmor
+ If you are running the device service on a system with AppArmor,
+ to be able to run the device service without requiring the `--privileged` 
+ flag please apply the provided security policy  `docker-ble-policy` 
+ using the command:
+ 
+```shell
+$ sudo apparmor_parser -r -W docker-ble-policy
+```
+
+If this security policy has been applied to the system, the `--security-opt` 
+flag replaces the  `--privileged` flag when running the device service:
+
+```shell
+$ docker run \
+  -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
+  --security-opt apparmor=docker-ble-policy -p 49971:49971 device-ble
 ```

@@ -1,10 +1,10 @@
 [Service]
-  Host = "edgex-device-bluetooth"
+  Host = "edgex-device-ble"
   Port = 49971
   Timeout = 5000
   ConnectRetries = 3
-  Labels = [ "Bluetooth" ]
-  StartupMsg = "The Bluetooth device service has started"
+  Labels = [ "BLE" ]
+  StartupMsg = "The BLE device service has started"
   ReadMaxLimit = 256
   CheckInterval = "10s"
 
@@ -29,8 +29,8 @@
   ProfilesDir = "./profiles"
 
 [Driver]
-  BluetoothInterface = "hci0"
-  BluetoothDiscoveryDuration = "20"
+  BLE_Interface = "hci0"
+  BLE_DiscoveryDuration = "20"
 
 [Logging]
   RemoteURL = ""
