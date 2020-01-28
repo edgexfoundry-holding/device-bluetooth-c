@@ -724,7 +724,7 @@ int main (int argc, char *argv[])
 {
   edgex_device_svcparams params = {"device-ble",
                                    NULL,
-                                   getenv ("EDGEX_REGISTRY"),
+                                   NULL,
                                    NULL};
 
   if (!edgex_device_service_processparams (&argc, argv, &params))
