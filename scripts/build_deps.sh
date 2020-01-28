@@ -23,5 +23,7 @@ if [ ! -d deps ]; then
   ./scripts/build.sh
   cp -rf include/* /usr/include/
   cp build/debug/c/libcsdk.so /usr/lib/
+  mkdir -p /usr/share/doc/edgex-csdk
+  cp Attribution.txt /usr/share/doc/edgex-csdk
   rm -rf /device-ble-c/deps
 fi
