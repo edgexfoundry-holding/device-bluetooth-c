@@ -3,29 +3,15 @@ The BLE Device Service connects Bluetooth Low Energy
 devices with EdgeX. The Device Service
 currently limited to Bluetooth GATT devices/profiles.
 
-## Dependencies
-
-- [Device-C-SDK](https://github.com/edgexfoundry/device-sdk-c) -
-The device c sdk provides a framework for building
-EdgeX Device Services in C.
-
-- [D-Bus](https://www.freedesktop.org/wiki/Software/dbus/) -
-D-Bus is an Inter-Process Communication (IPC) and
-Remote Procedure Calling (RPC) mechanism
-specifically designed for efficient and easy-to-use
-communication between processes running on the same
-machine.
-
 ## Prerequisites
-- [D-Bus](https://www.freedesktop.org/wiki/Software/dbus/) -
-D-Bus daemon is required to be running on the host machine
-alongside the Device Service to allow communication
-between the BLE Device Service and the BlueZ daemon.
- 
-- [BlueZ](http://www.bluez.org/) -
-BlueZ Linux module is required to be installed on the host
-machine. This allows the connection between the Device Service
-and BLE devices using D-Bus.
+- A Linux build host.
+- [GCC][gcc] that supports C11.
+- [Make][make] version 4.1.
+- [CMake][cmake] version 3.1 or greater.
+- [Cbor][libcbor] version 0.5.
+- [Device-SDK-C][device-sdk-c] version 1.0.0 or greater.
+- [D-Bus][dbus] version 1.12.2.
+- [BlueZ][bluez] version 5.48.
 
 ## Configuration File
 
@@ -67,7 +53,7 @@ Service starts.
   Name = "SensorTag-01"
   Profile = "CC2650 SensorTag"
   Description = "TI SensorTag 2650 STK"
-  Labels = [ "bluetooth" ]
+  Labels = [ "ble" ]
   [DeviceList.Protocols]
     [DeviceList.Protocols.BLE]
       MAC = "00:00:00:00:00:00"
@@ -78,10 +64,24 @@ To build a local version of the Device Service,
 clone the repository and run the following
 shell commands.
 
+Before building the device service, please
+ensure that you have the EdgeX Device-SDK-C installed and
+make sure that the current directory is the device
+service directory (device-ble-c). To build
+the device service, enter the command below into
+the command line to run the build script.
+
 ```shell
-$ cd device-bluetooth-c
 $ ./scripts/build.sh
 ```
+
+In the event that your Device-SDK-C is not installed in the
+system default paths, you may specify its location
+using the environment variable CSDK_DIR (as the build will look
+for $CSDK_DIR/include, $CSDK_DIR/lib etc).
+
+After having built the device service, the executable
+can be found at `build/{debug,release}/device-ble-c/device-ble-c`.
 
 ## Run
 After successfully building the Device Service,
@@ -117,7 +117,7 @@ To build a Docker image of the Device Service,
 clone the repository and enter the following
 shell commands.
 ```shell
-$ cd device-bluetooth-c
+$ cd device-ble-c
 $ docker build -t device-ble \
   -f ./scripts/Dockerfile.alpine-3.9 \
   --build-arg arch=$(uname -m) .
@@ -138,7 +138,6 @@ $ docker run \
   -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
   --privileged -p 49971:49971 device-ble
 ```
-
 #### AppArmor
  If you are running the device service on a system with AppArmor,
  to be able to run the device service without requiring the `--privileged` 
@@ -157,3 +156,11 @@ $ docker run \
   -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
   --security-opt apparmor=docker-ble-policy -p 49971:49971 device-ble
 ```
+
+[libcbor]: https://github.com/PJK/libcbor
+[device-c-sdk]: https://github.com/edgexfoundry/device-sdk-c
+[dbus]: https://www.freedesktop.org/wiki/Software/dbus/
+[bluez]: http://www.bluez.org/
+[make]: https://www.gnu.org/software/make/
+[cmake]: https://cmake.org/
+[gcc]: https://gcc.gnu.org/
