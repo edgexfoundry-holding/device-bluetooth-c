@@ -158,7 +158,7 @@ $ docker run \
 ```
 
 [libcbor]: https://github.com/PJK/libcbor
-[device-c-sdk]: https://github.com/edgexfoundry/device-sdk-c
+[device-sdk-c]: https://github.com/edgexfoundry/device-sdk-c
 [dbus]: https://www.freedesktop.org/wiki/Software/dbus/
 [bluez]: http://www.bluez.org/
 [make]: https://www.gnu.org/software/make/
