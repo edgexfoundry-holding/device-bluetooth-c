@@ -409,8 +409,8 @@ coreCommands:
   -
     name: "CC2650HumidityConfiguration"
     put:
-      path: "/api/v1/device/{deviceId}/HumidityConfiguration"
-      parameterNames: ["CC2650HumidityData"]
+      path: "/api/v1/device/{deviceId}/CC2650HumidityConfiguration"
+      parameterNames: ["CC2650HumidityConfiguration"]
       responses:
         - code: "200"
           description: ""
