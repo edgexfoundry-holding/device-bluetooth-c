@@ -344,6 +344,11 @@ static bool ble_get_handler (void *impl, const char *devname, const edgex_protoc
           data = (double *) offset_byte_array;
         }
       }
+      else
+      {
+          iot_log_error (driver->lc, "raw type attribute \"%s\" currently isn't supported", raw_type);
+          successful_get_request = false;
+      }
 
       if (successful_get_request == false)
       {
