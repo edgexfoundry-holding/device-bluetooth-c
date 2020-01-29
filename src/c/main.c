@@ -99,9 +99,7 @@ static bool ble_init_handler (void *impl, struct iot_logger_t *lc, const edgex_n
   }
 
   iot_log_info (driver->lc, "Discovering devices for %d seconds", ble_discovery_duration);
-  ble_set_discovery_mode (driver->lc, BLE_DISCOVERY_ON);
-  sleep (ble_discovery_duration);
-  ble_set_discovery_mode (driver->lc, BLE_DISCOVERY_OFF);
+  ble_discovery (driver->lc, ble_discovery_duration);
   iot_log_info (driver->lc, "Finished discovering devices");
 
   initialize_conversions ();
@@ -358,6 +356,7 @@ static bool ble_get_handler (void *impl, const char *devname, const edgex_protoc
 
       if (successful_convert_value == false)
       {
+        free (byte_array);
         successful_get_request = false;
         break;
       }
@@ -371,10 +370,14 @@ static bool ble_get_handler (void *impl, const char *devname, const edgex_protoc
           break;
 
         case Binary:
-          readings[i].value.binary_result.size = byte_array_size;
-          readings[i].value.binary_result.bytes = (uint8_t *) byte_array;
-          break;
+        {
+          uint8_t *binary_value = calloc (byte_array_size, 1);
+          memcpy (binary_value, (uint8_t *) byte_array, byte_array_size);
 
+          readings[i].value.binary_result.size = byte_array_size;
+          readings[i].value.binary_result.bytes = binary_value;
+          break;
+        }
         case String:
         {
           char *string_value = byte_array;

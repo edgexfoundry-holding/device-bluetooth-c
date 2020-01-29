@@ -24,9 +24,6 @@ static void replace_char (char *dst, char find, char replace)
 static DBusMessage *dbus_get_property (iot_logger_t *lc, DBusConnection *dbus_conn, void *dst, char *dbus_path,
                                        char *interface, char *property_name)
 {
-  DBusError dbus_error;
-  dbus_error_init (&dbus_error);
-
   DBusMessage *dbus_msg = dbus_message_new_method_call ("org.bluez", dbus_path, "org.freedesktop.DBus.Properties",
                                                         "Get");
 
@@ -35,6 +32,9 @@ static DBusMessage *dbus_get_property (iot_logger_t *lc, DBusConnection *dbus_co
   dbus_message_iter_append_basic (&dbus_msg_args, DBUS_TYPE_STRING, &interface);
   dbus_message_iter_append_basic (&dbus_msg_args, DBUS_TYPE_STRING, &property_name);
 
+  DBusError dbus_error;
+  dbus_error_init (&dbus_error);
+
   DBusMessage *dbus_reply = dbus_connection_send_with_reply_and_block (dbus_conn, dbus_msg, DBUS_TIMEOUT_USE_DEFAULT,
                                                                        &dbus_error);
   dbus_message_unref (dbus_msg);
@@ -42,8 +42,11 @@ static DBusMessage *dbus_get_property (iot_logger_t *lc, DBusConnection *dbus_co
   if (dbus_error_is_set (&dbus_error))
   {
     iot_log_error (lc, "[D-Bus] %s %s", dbus_error.name, dbus_error.message);
+    dbus_error_free (&dbus_error);
     return NULL;
   }
+  dbus_error_free (&dbus_error);
+
   DBusMessageIter dbus_reply_iterator, dbus_reply_iterator_value;
   dbus_message_iter_init (dbus_reply, &dbus_reply_iterator);
 
@@ -57,27 +60,23 @@ int ble_initialize (iot_logger_t *lc, char *interface_name)
 {
   iot_log_info (lc, "Using \"%s\" as ble interface", interface_name);
 
-  DBusError dbus_error;
-  dbus_error_init (&dbus_error);
-
-  if (dbus_error_is_set (&dbus_error))
-  {
-    iot_log_error (lc, "[D-Bus] %s %s", dbus_error.name, dbus_error.message);
-    return -1;
-  }
-
   ble_dbus_base_path_length = strlen ("/org/bluez/") + strlen (interface_name) + 1;
   ble_dbus_base_path = calloc (ble_dbus_base_path_length, sizeof (char));
   strcpy (ble_dbus_base_path, "/org/bluez/");
   strcat (ble_dbus_base_path, interface_name);
+
+  DBusError dbus_error;
+  dbus_error_init (&dbus_error);
 
   /* Setup private DBus connection */
   DBusConnection *dbus_conn = dbus_bus_get_private (DBUS_BUS_SYSTEM, &dbus_error);
   if (dbus_error_is_set (&dbus_error))
   {
     iot_log_error (lc, "[D-Bus] %s %s", dbus_error.name, dbus_error.message);
+    dbus_error_free (&dbus_error);
     return -1;
   }
+  dbus_error_free (&dbus_error);
 
   int successful_init = 0;
   if (ble_disconnect_all_devices (lc, dbus_conn) == -1)
@@ -102,8 +101,11 @@ void ble_stop (iot_logger_t *lc)
   if (dbus_error_is_set (&dbus_error))
   {
     iot_log_error (lc, "[D-Bus] %s %s", dbus_error.name, dbus_error.message);
+    dbus_error_free (&dbus_error);
     return;
   }
+  dbus_error_free (&dbus_error);
+
   if (ble_disconnect_all_devices (lc, dbus_conn) == -1)
   {
     iot_log_error (lc, "Couldn't disconnect all devices");
@@ -115,17 +117,9 @@ void ble_stop (iot_logger_t *lc)
   dbus_connection_unref (dbus_conn);
 }
 
-int ble_set_discovery_mode (iot_logger_t *lc, enum ble_discovery_mode discovery_mode)
+int ble_discovery (iot_logger_t *lc, unsigned int discovery_duration)
 {
-  DBusError dbus_error;
-  dbus_error_init (&dbus_error);
-
   char dbus_cmd[] = "StartDiscovery";
-
-  if (discovery_mode == BLE_DISCOVERY_OFF)
-  {
-    strcpy (dbus_cmd, "StopDiscovery");
-  }
 
   DBusMessage *dbus_msg = dbus_message_new_method_call ("org.bluez", ble_dbus_base_path, "org.bluez.Adapter1",
                                                         dbus_cmd);
@@ -135,11 +129,19 @@ int ble_set_discovery_mode (iot_logger_t *lc, enum ble_discovery_mode discovery_
     return -1;
   }
 
-  DBusConnection *dbus_conn = dbus_bus_get (DBUS_BUS_SYSTEM, &dbus_error);
+  DBusError dbus_error;
+  dbus_error_init (&dbus_error);
+
+  DBusConnection *dbus_conn = dbus_bus_get_private (DBUS_BUS_SYSTEM, &dbus_error);
   if (dbus_error_is_set (&dbus_error))
   {
     iot_log_error (lc, "[D-Bus] %s %s", dbus_error.name, dbus_error.message);
+    dbus_error_free (&dbus_error);
+    dbus_message_unref (dbus_msg);
+    return -1;
   }
+  dbus_error_free (&dbus_error);
+  dbus_error_init (&dbus_error);
 
   DBusMessage *dbus_reply = dbus_connection_send_with_reply_and_block (dbus_conn, dbus_msg, DBUS_TIMEOUT_USE_DEFAULT,
                                                                        &dbus_error);
@@ -148,16 +150,21 @@ int ble_set_discovery_mode (iot_logger_t *lc, enum ble_discovery_mode discovery_
   if (dbus_error_is_set (&dbus_error))
   {
     iot_log_error (lc, "[D-Bus] %s %s", dbus_error.name, dbus_error.message);
+    dbus_error_free (&dbus_error);
+    dbus_connection_close (dbus_conn);
+    dbus_connection_unref (dbus_conn);
     return -1;
   }
-
-  if (dbus_reply == NULL)
-  {
-    iot_log_error (lc, "Failed to StartDiscovery");
-    return -1;
-  }
+  sleep (discovery_duration);
+  // Once the sleep has ended and the
+  // closure of the D-Bus private connection
+  // below takes place, the Bluetooth
+  // discovery mode will default back to off.
 
   dbus_message_unref (dbus_reply);
+  dbus_connection_close (dbus_conn);
+  dbus_connection_unref (dbus_conn);
+
   return 0;
 }
 
@@ -185,9 +192,6 @@ int ble_is_device_connected (iot_logger_t *lc, DBusConnection *dbus_conn, char *
 
 int ble_connect_device (iot_logger_t *lc, DBusConnection *dbus_conn, char *mac)
 {
-  DBusError dbus_error;
-  dbus_error_init (&dbus_error);
-
   unsigned int dbus_path_length = ble_dbus_base_path_length + DBUS_DEVICE_MAC_LENGTH + 1;
   char mac_formatted[strlen (mac) + 1];
   char dbus_path[dbus_path_length];
@@ -203,14 +207,19 @@ int ble_connect_device (iot_logger_t *lc, DBusConnection *dbus_conn, char *mac)
     return -1;
   }
 
+  DBusError dbus_error;
+  dbus_error_init (&dbus_error);
+
   DBusMessage *dbus_reply = dbus_connection_send_with_reply_and_block (dbus_conn, dbus_msg, DBUS_TIMEOUT_USE_DEFAULT,
                                                                        &dbus_error);
   dbus_message_unref (dbus_msg);
   if (dbus_error_is_set (&dbus_error))
   {
     iot_log_error (lc, "[D-Bus] %s %s", dbus_error.name, dbus_error.message);
+    dbus_error_free (&dbus_error);
     return -1;
   }
+  dbus_error_free (&dbus_error);
 
   if (dbus_reply == NULL)
   {
@@ -230,9 +239,6 @@ int ble_connect_device (iot_logger_t *lc, DBusConnection *dbus_conn, char *mac)
 
 static int ble_disconnect_device (iot_logger_t *lc, DBusConnection *dbus_conn, char *dbus_device_path)
 {
-  DBusError dbus_error;
-  dbus_error_init (&dbus_error);
-
   DBusMessage *dbus_msg = dbus_message_new_method_call ("org.bluez", dbus_device_path, "org.bluez.Device1",
                                                         "Disconnect");
   if (dbus_msg == NULL)
@@ -241,14 +247,19 @@ static int ble_disconnect_device (iot_logger_t *lc, DBusConnection *dbus_conn, c
     return -1;
   }
 
+  DBusError dbus_error;
+  dbus_error_init (&dbus_error);
+
   DBusMessage *dbus_reply = dbus_connection_send_with_reply_and_block (dbus_conn, dbus_msg, DBUS_TIMEOUT_USE_DEFAULT,
                                                                        &dbus_error);
   dbus_message_unref (dbus_msg);
   if (dbus_error_is_set (&dbus_error))
   {
     iot_log_error (lc, "[D-Bus] %s %s", dbus_error.name, dbus_error.message);
+    dbus_error_free (&dbus_error);
     return -1;
   }
+  dbus_error_free (&dbus_error);
 
   if (dbus_reply == NULL)
   {
@@ -263,8 +274,6 @@ static int ble_disconnect_device (iot_logger_t *lc, DBusConnection *dbus_conn, c
 
 int ble_disconnect_all_devices (iot_logger_t *lc, DBusConnection *dbus_conn)
 {
-  DBusError dbus_error;
-  dbus_error_init (&dbus_error);
   DBusMessage *dbus_msg = dbus_message_new_method_call ("org.bluez", "/", "org.freedesktop.DBus.ObjectManager",
                                                         "GetManagedObjects");
 
@@ -274,6 +283,9 @@ int ble_disconnect_all_devices (iot_logger_t *lc, DBusConnection *dbus_conn)
     return -1;
   }
 
+  DBusError dbus_error;
+  dbus_error_init (&dbus_error);
+
   DBusMessage *dbus_reply = dbus_connection_send_with_reply_and_block (dbus_conn, dbus_msg, DBUS_TIMEOUT_USE_DEFAULT,
                                                                        &dbus_error);
   dbus_message_unref (dbus_msg);
@@ -281,8 +293,10 @@ int ble_disconnect_all_devices (iot_logger_t *lc, DBusConnection *dbus_conn)
   if (dbus_error_is_set (&dbus_error))
   {
     iot_log_error (lc, "[D-Bus] %s %s", dbus_error.name, dbus_error.message);
+    dbus_error_free (&dbus_error);
     return -1;
   }
+  dbus_error_free (&dbus_error);
 
   char *dbus_object_path = NULL;
   DBusMessageIter dbus_paths_list, dbus_path_iter, dictIter;
@@ -329,8 +343,6 @@ int ble_disconnect_all_devices (iot_logger_t *lc, DBusConnection *dbus_conn)
 static char *get_gatt_characteristic_dbus_path (iot_logger_t *lc, DBusConnection *dbus_conn, char *mac,
                                                 char *characteristic_uuid)
 {
-  DBusError dbus_error;
-  dbus_error_init (&dbus_error);
   DBusMessage *dbus_msg = dbus_message_new_method_call ("org.bluez", "/", "org.freedesktop.DBus.ObjectManager",
                                                         "GetManagedObjects");
 
@@ -340,6 +352,9 @@ static char *get_gatt_characteristic_dbus_path (iot_logger_t *lc, DBusConnection
     return NULL;
   }
 
+  DBusError dbus_error;
+  dbus_error_init (&dbus_error);
+
   DBusMessage *dbus_reply = dbus_connection_send_with_reply_and_block (dbus_conn, dbus_msg, DBUS_TIMEOUT_USE_DEFAULT,
                                                                        &dbus_error);
   dbus_message_unref (dbus_msg);
@@ -347,8 +362,10 @@ static char *get_gatt_characteristic_dbus_path (iot_logger_t *lc, DBusConnection
   if (dbus_error_is_set (&dbus_error))
   {
     iot_log_error (lc, "[D-Bus] %s %s", dbus_error.name, dbus_error.message);
+    dbus_error_free (&dbus_error);
     return NULL;
   }
+  dbus_error_free (&dbus_error);
 
   char *dbus_object_path = NULL;
   DBusMessageIter dbus_paths_list, dbus_path_iter, dbus_dictionary_iter;
@@ -459,8 +476,11 @@ int ble_read_gatt_characteristic (iot_logger_t *lc, DBusConnection *dbus_conn, c
   if (dbus_error_is_set (&dbus_error))
   {
     iot_log_error (lc, "[D-Bus] %s %s", dbus_error.name, dbus_error.message);
+    dbus_error_free (&dbus_error);
     return -1;
   }
+  dbus_error_free (&dbus_error);
+  dbus_error_init (&dbus_error);
 
   uint8_t *byte_array = NULL;
   unsigned int byte_array_size = 0;
@@ -471,8 +491,10 @@ int ble_read_gatt_characteristic (iot_logger_t *lc, DBusConnection *dbus_conn, c
   if (dbus_error_is_set (&dbus_error))
   {
     iot_log_error (lc, "[D-Bus] %s %s", dbus_error.name, dbus_error.message);
+    dbus_error_free (&dbus_error);
     return -1;
   }
+  dbus_error_free (&dbus_error);
 
   if (byte_array_size == 0)
   {
@@ -494,9 +516,6 @@ int ble_write_gatt_characteristic (iot_logger_t *lc, DBusConnection *dbus_conn, 
 
   strcpy (mac_formatted, mac);
   replace_char (mac_formatted, ':', '_');
-
-  DBusError dbus_error;
-  dbus_error_init (&dbus_error);
 
   char *gatt_characteristic_dbus_path = get_gatt_characteristic_dbus_path (lc, dbus_conn, mac_formatted,
                                                                            characteristic_uuid);
@@ -526,16 +545,28 @@ int ble_write_gatt_characteristic (iot_logger_t *lc, DBusConnection *dbus_conn, 
                                                                      DBUS_DICT_ENTRY_END_CHAR_AS_STRING,
                                     &dbus_dictionary_iter);
   dbus_message_iter_close_container (&dbus_msg_args, &dbus_dictionary_iter);
-  dbus_connection_send_with_reply_and_block (dbus_conn, dbus_msg, DBUS_TIMEOUT_USE_DEFAULT, &dbus_error);
 
+  DBusError dbus_error;
+  dbus_error_init (&dbus_error);
+
+  DBusMessage *dbus_reply = dbus_connection_send_with_reply_and_block (dbus_conn, dbus_msg, DBUS_TIMEOUT_USE_DEFAULT,
+                                                                         &dbus_error);
   dbus_message_unref (dbus_msg);
+
+  if (dbus_reply != NULL)
+  {
+      dbus_message_unref (dbus_reply);
+  }
+
   free (gatt_characteristic_dbus_path);
 
   if (dbus_error_is_set (&dbus_error))
   {
     iot_log_error (lc, "[D-Bus] %s %s", dbus_error.name, dbus_error.message);
+    dbus_error_free (&dbus_error);
     return -1;
   }
+  dbus_error_free (&dbus_error);
 
   return 0;
 }
