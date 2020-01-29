@@ -19,12 +19,6 @@ extern "C" {
 
 #define DBUS_DEVICE_MAC_LENGTH 22 // strlen ("/dev_XX_XX_XX_XX_XX_XX");
 
-enum ble_discovery_mode
-{
-  BLE_DISCOVERY_ON,
-  BLE_DISCOVERY_OFF
-};
-
 int ble_initialize (iot_logger_t *, char *);
 
 void ble_stop (iot_logger_t *);
