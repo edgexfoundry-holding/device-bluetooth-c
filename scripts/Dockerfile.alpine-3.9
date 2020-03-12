@@ -1,28 +1,49 @@
-FROM alpine:3.9 as builder
+FROM alpine:3.9 as buildsdk
 MAINTAINER IOTech <support@iotechsys.com>
 
 RUN apk add --update --no-cache \
-    dbus \
-    dbus-dev \
-    dbus-libs \
     build-base \
     gcc \
     cmake \
     make \
-    linux-headers \
+    linux-headers
+
+RUN apk add --update --no-cache \
     yaml-dev \
     libmicrohttpd-dev \
     curl-dev \
+    util-linux-dev \
     git
+
+COPY scripts/build_deps.sh /device-ble-c/scripts/build_deps.sh
+RUN /device-ble-c/scripts/build_deps.sh
+
+FROM alpine:3.9 as builder
+MAINTAINER IOTech <support@iotechsys.com>
+
+RUN apk add --update --no-cache \
+    build-base \
+    gcc \
+    cmake \
+    make \
+    linux-headers
+
+RUN apk add --update --no-cache \
+    dbus-dev \
+    yaml \
+    libmicrohttpd
+
+COPY --from=buildsdk /usr/include/edgex /usr/include/edgex
+COPY --from=buildsdk /usr/include/iot /usr/include/iot
+COPY --from=buildsdk /usr/lib/libcsdk.so /usr/lib
+COPY --from=buildsdk /usr/local/lib/libcbor* /usr/local/lib/
 
 COPY scripts /device-ble-c/scripts
 COPY cmake /device-ble-c/cmake
 COPY src /device-ble-c/src/
 COPY VERSION /device-ble-c/
-
 COPY CMakeLists.txt /device-ble-c/CMakeLists.txt
 
-RUN /device-ble-c/scripts/build_deps.sh
 RUN /device-ble-c/scripts/build.sh
 
 FROM alpine:3.9
@@ -34,11 +55,10 @@ RUN apk add --update --no-cache \
     curl \
     libuuid
 
-COPY --from=builder /usr/lib/libcsdk.so /usr/lib
-COPY --from=builder /usr/include/edgex /usr/include/edgex
-COPY --from=builder /usr/include/iot /usr/include/iot
-COPY --from=builder /usr/share/doc/edgex-csdk /usr/share/doc/edgex-csdk
-COPY --from=builder /usr/local/lib/libcbor* /usr/local/lib/
+COPY --from=buildsdk /usr/lib/libcsdk.so /usr/lib
+COPY --from=buildsdk /usr/share/doc/edgex-csdk /usr/share/doc/edgex-csdk
+COPY --from=buildsdk /usr/local/lib/libcbor* /usr/local/lib/
+COPY --from=buildsdk /usr/share/doc/edgex-csdk /usr/share/doc/edgex-csdk
 
 COPY --from=builder /device-ble-c/build/release/device-ble/device-ble device-ble
 
