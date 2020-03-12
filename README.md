@@ -80,15 +80,19 @@ Service starts.
 
 ## Build
 To build a local version of the device service, first clone the 
-repository. The provided shell command can then be used to build the 
-device service.
+repository.
 
 Before building the device service, please
 ensure that you have the EdgeX Device-SDK-C installed and
 make sure that the current directory is the device
-service directory (device-ble). To build
-the device service, enter the command below into
-the command line to run the build script.
+service directory (device-ble-c). 
+
+The SDK is installed by either unpacking the tar.gz file into an 
+appropriate directory, or by installing the .deb or .rpm package by the 
+usual method if you are on a platform where that's supported. 
+
+To build the device service, enter the 
+command below into the command line to run the build script.
 
 ```shell
 $ ./scripts/build.sh
