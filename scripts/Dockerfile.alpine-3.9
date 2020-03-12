@@ -40,9 +40,9 @@ COPY --from=builder /usr/include/iot /usr/include/iot
 COPY --from=builder /usr/share/doc/edgex-csdk /usr/share/doc/edgex-csdk
 COPY --from=builder /usr/local/lib/libcbor* /usr/local/lib/
 
-COPY --from=builder /device-ble-c/build/release/device-ble-c/device-ble-c device-ble-c
+COPY --from=builder /device-ble-c/build/release/device-ble/device-ble device-ble
 
 COPY res res/
 COPY profiles profiles/
 
-ENTRYPOINT ["./device-ble-c", "--registry", "consul://edgex-core-consul:8500"]
+ENTRYPOINT ["./device-ble", "--registry", "consul://edgex-core-consul:8500"]
