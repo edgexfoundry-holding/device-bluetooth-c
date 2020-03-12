@@ -5,6 +5,10 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  */
+#if defined __STDC_VERSION__ && __STDC_VERSION__ < 201112L
+#error This service requires a C11 compiler
+#endif
+
 #include "edgex/devsdk.h"
 #include "ble.h"
 #include "conversion.h"
