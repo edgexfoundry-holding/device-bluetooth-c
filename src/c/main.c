@@ -5,7 +5,6 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  */
-
 #include "edgex/devsdk.h"
 #include "ble.h"
 #include "conversion.h"
