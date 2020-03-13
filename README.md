@@ -27,8 +27,12 @@ version specified below if running on a Ubuntu 16.04 host.
 - [D-Bus][dbus] version 1.10.6 or greater.
 - [Device-SDK-C][device-sdk-c] version 1.1.1 or greater.
 
+Please note: On Alpine there is no standard package for
+Cbor, so it is downloaded and built automatically into the Docker build.
+
 ### Runtime 
 
+- [Cbor][libcbor] version 0.5 or greater.
 - [D-Bus][dbus] version 1.10.6 or greater.
 - [BlueZ][bluez] version 5.48 or greater.
 
