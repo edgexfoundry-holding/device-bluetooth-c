@@ -117,8 +117,7 @@ project directory. As the device service
 executable requires the configuration.toml in
 `res/` and any device profiles in `profiles/`.
 
-Run the following command in shell to start
-the device service
+The following shell command can be used to start the device service.
 
 ```./build/release/device-ble/device-ble```
 
