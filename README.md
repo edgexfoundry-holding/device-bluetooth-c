@@ -1,21 +1,44 @@
 # BLE Device Service
-The BLE Device Service connects Bluetooth Low Energy
-devices with EdgeX. The Device Service
-currently limited to Bluetooth GATT devices/profiles.
+The BLE device service connects Bluetooth Low Energy
+devices with EdgeX. This device service currently only supports the 
+BLE GATT profile.
+
+Disclaimer: It is only possible to run this device service fully confined 
+on distros with AppArmor enabled such as Ubuntu. At this time, this 
+device service is not supported on any distro with SE Linux enabled by 
+default.
 
 ## Prerequisites
-- A Linux build host.
-- [GCC][gcc] that supports C11.
-- [Make][make] version 4.1.
-- [CMake][cmake] version 3.1 or greater.
-- [Cbor][libcbor] version 0.5.
-- [Device-SDK-C][device-sdk-c] version 1.0.0 or greater.
-- [D-Bus][dbus] version 1.12.2.
-- [BlueZ][bluez] version 5.48.
+
+This device service is only supported on Linux, as it requires both DBus and the BlueZ Bluetooth stack. 
+Although it may be possible to get both running on MacOS or Windows, use on either is considered unsupported.
+
+Only Ubuntu 16.04 and 18.04 have been tested for building and running 
+this device service. Please note, BlueZ must be updated to at least the 
+version specified below if running on a Ubuntu 16.04 host.
+
+### Building
+
+- A Linux build host
+- [Make][make]
+- [GCC][gcc] version 5.x or greater.
+- [CMake][cmake] version 3.0 or greater.
+- [Cbor][libcbor] version 0.5 or greater.
+- [D-Bus][dbus] version 1.10.6 or greater.
+- [Device-SDK-C][device-sdk-c] version 1.1.1 or greater.
+
+Please note: On Alpine there is no standard package for
+Cbor, so it is downloaded and built automatically into the Docker build.
+
+### Runtime 
+
+- [Cbor][libcbor] version 0.5 or greater.
+- [D-Bus][dbus] version 1.10.6 or greater.
+- [BlueZ][bluez] version 5.48 or greater.
 
 ## Configuration File
 
-In the Device Service ```res/configuration.toml```
+In the device service ```res/configuration.toml```
 file, you will find two extra configurable options
 under the `[Driver]` table.
 
@@ -27,12 +50,12 @@ under the `[Driver]` table.
 
 #### BLE_Interface
 BLE_Interface specifies which Host Controller
-Interface (HCI) the Device Service will use.
+Interface (HCI) the device service will use.
 You can find out, which interfaces are
 available with BlueZ ```hciconfig``` tool.
 
 #### BLE_DiscoveryDuration
-When the Device Service starts, Bluetooth
+When the device service starts, Bluetooth
 discovery will be enabled for the time
 amount specified by BLE_DiscoveryDuration
 (in seconds). After which, Bluetooth discovery
@@ -43,7 +66,7 @@ To add a new BLE device to the Device
 Service, insert the layout below into the
 configuration.toml file. Update the Name,
 Profile, Description, Mac to match the device
-you wish to add. Start the Device Service
+you wish to add. Start the device service
 and make sure that the device you're wanting
 to add is in advertising mode, when the Device
 Service starts.
@@ -60,16 +83,17 @@ Service starts.
 ```
 
 ## Build
-To build a local version of the Device Service,
-clone the repository and run the following
-shell commands.
+First clone the device service repository. Before building the device 
+service, please ensure that you have the EdgeX Device-SDK-C installed 
+and make sure that the current directory is the device service 
+directory (device-ble-c). 
 
-Before building the device service, please
-ensure that you have the EdgeX Device-SDK-C installed and
-make sure that the current directory is the device
-service directory (device-ble-c). To build
-the device service, enter the command below into
-the command line to run the build script.
+The SDK is installed by either unpacking the tar.gz file into an 
+appropriate directory, or by installing the .deb or .rpm package by the 
+usual method if you are on a platform where that's supported. 
+
+To build the device service, enter the 
+command below into the command line to run the build script.
 
 ```shell
 $ ./scripts/build.sh
@@ -81,22 +105,21 @@ using the environment variable CSDK_DIR (as the build will look
 for $CSDK_DIR/include, $CSDK_DIR/lib etc).
 
 After having built the device service, the executable
-can be found at `build/{debug,release}/device-ble-c/device-ble-c`.
+can be found at `build/{debug,release}/device-ble/device-ble`.
 
 ## Run
-After successfully building the Device Service,
-you should have the Device Service executable
-in `./build/release/device-ble-c/` named
-`device-ble-c`. To run this executable,
+After successfully building the device service,
+you should have the device service executable
+in `./build/release/device-ble/` named
+`device-ble`. To run this executable,
 make sure your current directory is the root
-project directory. As the Device Service
+project directory. As the device service
 executable requires the configuration.toml in
 `res/` and any device profiles in `profiles/`.
 
-Run the following command in shell to start
-the Device Service
+The following shell command can be used to start the device service.
 
-```./build/release/device-ble-c/device-ble-c```
+```./build/release/device-ble/device-ble```
 
 
 #### Command Line Options
@@ -108,36 +131,43 @@ the Device Service
 |--confdir  | -c                | Set the configuration directory |
 
 An example of using a command line option from the table above.
-```./build/release/device-ble-c/device-ble-c -c res/```
+```./build/release/device-ble/device-ble -c res/```
 
 ## Docker
 
 #### Build
-To build a Docker image of the Device Service,
+To build a Docker image of the device service,
 clone the repository and enter the following
 shell commands.
+
+
 ```shell
 $ cd device-ble-c
-$ docker build -t device-ble \
+$ docker build --no-cache -t device-ble \
   -f ./scripts/Dockerfile.alpine-3.9 \
   --build-arg arch=$(uname -m) .
 ```
 
 #### Run
-First, build a Docker image of the Device Service,
-and enter the shell command below to run the Docker
-image within a Docker container.
 
-The Device Service docker container requires the
+Firstly, build a Docker image of the device service.
+The provided shell command can then be used to run the Docker image 
+within a Docker container. 
+
+The device service docker container requires the
 host machine `system_bus_socket` socket to be
 mounted, to allow communication between the
 container and the host machine D-Bus.
 
 ```shell
-$ docker run \
+$ docker run --rm \
   -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
-  --privileged -p 49971:49971 device-ble
+  --privileged -p 49971:49971 --network=<docker-network> device-ble
 ```
+
+Where `<docker-network>` is the name of the currently running Docker 
+network, which the container is to be attached to.
+
 #### AppArmor
  If you are running the device service on a system with AppArmor,
  to be able to run the device service without requiring the `--privileged` 
@@ -149,12 +179,13 @@ $ sudo apparmor_parser -r -W docker-ble-policy
 ```
 
 If this security policy has been applied to the system, the `--security-opt` 
-flag replaces the  `--privileged` flag when running the device service:
+option replaces the  `--privileged` flag when running the device service:
 
 ```shell
 $ docker run \
   -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
-  --security-opt apparmor=docker-ble-policy -p 49971:49971 device-ble
+  --security-opt apparmor=docker-ble-policy -p 49971:49971 
+  --network=<docker-network> device-ble
 ```
 
 [libcbor]: https://github.com/PJK/libcbor
