@@ -14,7 +14,7 @@ if (NOT LIBDBUS_FOUND)
     message (WARNING "D-Bus library or header not found")
 endif ()
 
-include_directories (${DBUS_INCLUDE_DIR} ${DBUS_ARCH_INCLUDE_DIR})
+include_directories (${DBUS_INCLUDE_DIR} ${DBUS_ARCH_INCLUDE_DIR} ${LIBCSDK_INCLUDE_DIR})
 
 # Set additional C compiler flags
 if (DEFINED CMAKE_C_COMPILER_ID)
