@@ -57,7 +57,12 @@ When the device service starts, Bluetooth
 discovery will be enabled for the time
 amount specified by BLE_DiscoveryDuration
 (in seconds). After which, Bluetooth discovery
-will be disabled.
+will be disabled. 
+
+Discovery uses BlueZ to look for any Bluetooth devices around and logs 
+their details. If a device has not been logged by BlueZ then the Device 
+Service will not be able to perform a connection to the device to read 
+or write a value.
 
 ## Adding A Device
 To add a new BLE device to the Device
