@@ -103,7 +103,7 @@ follow standard data types. Some of these devices still return
 data in a final readable format, such as an Integer or a Float. However, 
 some of these characteristics don't. In order to convert the data into a 
 readable format that can be used within EdgeX, conversion options are 
-available where each one registered in `conversion.c' and implemented is 
+available where each one implemented and registered in `conversion.c` is 
 for a specific device resource.
 
 The current conversion functions implemented for this Device Service are 
