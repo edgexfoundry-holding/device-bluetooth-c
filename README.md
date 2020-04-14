@@ -17,24 +17,22 @@ Only Ubuntu 16.04 and 18.04 have been tested for building and running
 this device service. Please note, BlueZ must be updated to at least the 
 version specified below if running on a Ubuntu 16.04 host.
 
+In addition to [Device-SDK-C][device-sdk-c] (version 1.1.1 or greater) and its 
+dependencies (ie, cbor, yaml, curl, uuid, microhttpd) the following 
+packages are required for building and running the device service.
+
 ### Building
 
 - A Linux build host
 - [Make][make]
 - [GCC][gcc] version 5.x or greater.
 - [CMake][cmake] version 3.0 or greater.
-- [Cbor][libcbor] version 0.5 or greater.
-- [D-Bus][dbus] version 1.10.6 or greater.
-- [Device-SDK-C][device-sdk-c] version 1.1.1 or greater.
-
-Please note: On Alpine there is no standard package for
-Cbor, so it is downloaded and built automatically into the Docker build.
+- [D-Bus][dbus] developer package version 1.10.6 or greater.
 
 ### Runtime 
 
-- [Cbor][libcbor] version 0.5 or greater.
-- [D-Bus][dbus] version 1.10.6 or greater.
-- [BlueZ][bluez] version 5.48 or greater.
+- [D-Bus][dbus] library and system daemon version 1.10.6 or greater.
+- [BlueZ][bluez] system daemon version 5.48 or greater.
 
 ## Configuration File
 
