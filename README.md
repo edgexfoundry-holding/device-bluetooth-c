@@ -17,24 +17,22 @@ Only Ubuntu 16.04 and 18.04 have been tested for building and running
 this device service. Please note, BlueZ must be updated to at least the 
 version specified below if running on a Ubuntu 16.04 host.
 
+In addition to [Device-SDK-C][device-sdk-c] (version 1.1.1 or greater) and its 
+dependencies (ie, cbor, yaml, curl, uuid, microhttpd) the following 
+packages are required for building and running the device service.
+
 ### Building
 
 - A Linux build host
 - [Make][make]
 - [GCC][gcc] version 5.x or greater.
 - [CMake][cmake] version 3.0 or greater.
-- [Cbor][libcbor] version 0.5 or greater.
-- [D-Bus][dbus] version 1.10.6 or greater.
-- [Device-SDK-C][device-sdk-c] version 1.1.1 or greater.
-
-Please note: On Alpine there is no standard package for
-Cbor, so it is downloaded and built automatically into the Docker build.
+- [D-Bus][dbus] developer package version 1.10.6 or greater.
 
 ### Runtime 
 
-- [Cbor][libcbor] version 0.5 or greater.
-- [D-Bus][dbus] version 1.10.6 or greater.
-- [BlueZ][bluez] version 5.48 or greater.
+- [D-Bus][dbus] library and system daemon version 1.10.6 or greater.
+- [BlueZ][bluez] system daemon version 5.48 or greater.
 
 ## Configuration File
 
@@ -59,13 +57,18 @@ When the device service starts, Bluetooth
 discovery will be enabled for the time
 amount specified by BLE_DiscoveryDuration
 (in seconds). After which, Bluetooth discovery
-will be disabled.
+will be disabled. 
+
+Discovery uses BlueZ to look for any Bluetooth devices around and logs 
+their details. If a device has not been logged by BlueZ then the Device 
+Service will not be able to perform a connection to the device to read 
+or write a value.
 
 ## Adding A Device
 To add a new BLE device to the Device
 Service, insert the layout below into the
 configuration.toml file. Update the Name,
-Profile, Description, Mac to match the device
+Profile, Description, MAC to match the device
 you wish to add. Start the device service
 and make sure that the device you're wanting
 to add is in advertising mode, when the Device
@@ -80,6 +83,58 @@ Service starts.
   [DeviceList.Protocols]
     [DeviceList.Protocols.BLE]
       MAC = "00:00:00:00:00:00"
+```
+
+## Device Resources
+BLE GATT device resources are statically configured in the device 
+profile. These resources map their GATT characteristic UUID’s to 
+read/write specific values. A template device resource is provided.
+
+```
+name: "<device resource name>"
+description: "<description>"
+attributes:
+  { characteristicUuid: "<GATT characteristic UUID>" }
+properties:
+  value:
+    { type: "<data type>", readWrite: "<R/W/RW>" }
+  units:
+    { type: "<data type>", readWrite: "<R/W/RW>", defaultValue: "<default value>" }
+```
+### Conversions
+
+Some GATT characteristics are vendor specific, meaning they don't 
+follow standard data types. Some of these devices still return 
+data in a final readable format, such as an Integer or a Float. However, 
+some of these characteristics don't. In order to convert the data into a 
+readable format that can be used within EdgeX, conversion options are 
+available where each one implemented and registered in `conversion.c` is 
+for a specific device resource.
+
+The current conversion functions implemented for this Device Service are 
+for the Texas Instruments C2650 SensorTag. Any device resources that have 
+conversions implemented require two extra attributes, `startByte` and 
+`rawType`. The `startByte` attribute specifies at which byte should the 
+`rawType` be cast from. The casted value will then be handed to the 
+conversion function. In the example provided for `CC2650HumidityData`, 
+`startByte` is 3. The number of bytes in the array received from the 
+device is 4.
+
+```
+name: "CC2650HumidityData"
+description: "I/O Configuration"
+attributes:
+  { characteristicUuid: "f000aa21-0451-4000-b000-000000000000", startByte: "3", rawType: "Uint16" }
+properties:
+  value:
+    { type: "Float32",  floatEncoding: "eNotation", readWrite: "RW" }
+  units:
+    { type: "String", readWrite: "R", defaultValue: "Mode" }
+```
+
+The supported `rawTypes` are as follows.
+```
+Uint8, Uint16, Uint32, Uint64, Int8, Int16, Int32, Int64, Float32, Float64
 ```
 
 ## Build
